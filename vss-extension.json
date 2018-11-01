@@ -1,0 +1,44 @@
+{
+    "manifestVersion": 1,
+    "id": "vsts-work-item-create-child-links",
+    "publisher": "cofomo-henrickpoliquin",
+    "version": "0.1.2",
+    "name": "Create Child links",
+    "description": "Create child link defined by templates",
+    "public": false,
+    "categories": ["Repos"],
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "my-toolbar",
+            "type": "ms.vss-web.action",
+            "targets": [
+                "ms.vss-work-web.work-item-context-menu"
+            ],
+            "properties": {
+                "name": "Create Child Links",
+                "uri": "static/toolbar.html",
+                "text": "Create work item child links",
+                "title": "Create child links",
+                "toolbarText": "Create child links",
+                "icon": "img/one-click.png",
+                "groupId": "actions"
+            }
+        }
+    ],
+    "files": [
+        {
+            "path": "static/toolbar.html",
+            "addressable": true
+        },
+        {
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        }
+    ]
+}
