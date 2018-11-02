@@ -28,7 +28,7 @@
                     expand: true, 
                     flatten: true, 
                     src: ["node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js"], 
-                    dest: "lib",
+                    dest: "static/lib",
                     filter: "isFile" 
                 }]
             }

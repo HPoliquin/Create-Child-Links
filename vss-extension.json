@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.2",
+    "version": "0.1.10",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -12,11 +12,16 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
+    "icons": {
+        "default": "static/img/one-click.png"
+    },
     "contributions": [
         {
-            "id": "my-toolbar",
+            "id": "create-child-links-work-item-button",
             "type": "ms.vss-web.action",
             "targets": [
+                "ms.vss-work-web.work-item-toolbar-menu", 
+                "ms.vss-work-web.backlog-item-menu",
                 "ms.vss-work-web.work-item-context-menu"
             ],
             "properties": {
@@ -25,20 +30,28 @@
                 "text": "Create work item child links",
                 "title": "Create child links",
                 "toolbarText": "Create child links",
-                "icon": "img/one-click.png",
-                "groupId": "actions"
+                "icon": "static/img/one-click16.png",
+                "groupId": "actions",
+                "registeredObjectId": "create-child-links-work-item-button"
             }
         }
     ],
     "files": [
         {
+            "path": "static/img",
+            "addressable": true
+        },
+        {
             "path": "static/toolbar.html",
             "addressable": true
         },
         {
-            "path": "node_modules/vss-web-extension-sdk/lib",
-            "addressable": true,
-            "packagePath": "lib"
+            "path": "src/app.ts",
+            "addressable": true
+        },
+        {
+            "path": "static/lib/VSS.SDK.min.js",
+            "addressable": true
         }
     ]
 }
