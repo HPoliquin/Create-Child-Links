@@ -22,6 +22,7 @@
                 stderr: true
             }
         },
+
         copy: {
             scripts: {
                 files: [{
@@ -34,7 +35,14 @@
             }
         },
 
-        clean: ["dist/*.vsix"],
+        ts: {
+            default : {
+                src: ["src/**/*.ts"],
+                tsconfig: true
+            }
+        },
+
+        clean: ["dist/*.vsix"]
 
         
     });
@@ -42,9 +50,10 @@
     grunt.loadNpmTasks("grunt-exec");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks("grunt-ts");
 
-    grunt.registerTask("package-dev", ["exec:package_dev"]);
-    grunt.registerTask("package-release", ["exec:package_release"]);
+    grunt.registerTask("package-dev", ["copy", "exec:package_dev"]);
+    grunt.registerTask("package-release", ["copy", "exec:package_release"]);
     grunt.registerTask("publish-dev", ["package-dev", "exec:publish_dev"]);        
     grunt.registerTask("publish-release", ["package-release", "exec:publish_release"]);        
     

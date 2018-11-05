@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
+    <!-- VSS Framework -->
     <script src="lib/VSS.SDK.min.js"></script>
     <style>
         body {
@@ -11,7 +13,12 @@
         }
     </style>
     <script type="text/javascript">
-        VSS.init();
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformScripts: true,
+            usePlatformStyles: true
+        });
+
         // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
         var menuContributionHandler = (function () {
             "use strict";
@@ -28,13 +35,53 @@
         // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
         VSS.register("create-child-links-work-item-button", menuContributionHandler);
 
+        // Load main entry point for extension 
+        VSS.require(["TFS/Dashboards/WidgetHelpers"], function (WidgetHelpers) {
+            // loading succeeded
+            WidgetHelpers.IncludeWidgetStyles();
+            VSS.notifyLoadSucceeded();
+        });
 
-        VSS.ready(function() {
+        VSS.ready(function () {
             document.getElementById("name").innerText = VSS.getWebContext().user.name;
         });
     </script>
 </head>
-<body>        
-    <h1>Hello, <span id="name"></span></h1>
+
+<body>
+    <div class="widget-configuration">
+        <h1>Hello, <span id="name"></span></h1>
+
+        <div class="description">Select a board column and swimlane to move your work item.</p>
+
+            <div class="dropdown">
+                <label>Board column</label>
+                <div class="wrapper">
+                    <select class="board-column-select">
+                    </select>
+                </div>
+            </div>
+            <br />
+            <div class="dropdown">
+                <label>Doing or Done</label>
+                <div class="wrapper">
+                    <select class="board-doing-done-select">
+                        <option value="Doing">Doing</option>
+                        <option value="Done">Done</option>
+                    </select>
+                </div>
+            </div>
+            <br />
+            <div class="dropdown">
+                <label>Swimlane</label>
+                <div class="wrapper">
+                    <select class="board-row-select">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
 </body>
+
 </html>

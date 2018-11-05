@@ -1,19 +1,34 @@
 {
     "compilerOptions": {
         "module": "amd",
-        "target": "es6",
+        "target": "es5",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "noImplicitAny": false,
         "rootDir": "src/",
         "outDir": "dist/",
         "types": [
-            "vss-web-extension-sdk"
-        ]	
+            "vss-web-extension-sdk",
+            "jquery"
+        ],
+        "lib": [
+            "es2015.promise",
+            "es5",
+            "dom"
+        ]
     },
     "include": [
-        "src/**/*",
-        "static/**/*"
+        "/src/**/*",
+        "/static/**/*"
     ],
     "exclude": [
         "node_modules",
-        "**/*.spec.ts"
-    ]
+        "bower_components",
+        "typings/main",
+        "typings/main.d.ts"
+      ]
+    
 }
