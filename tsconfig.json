@@ -1,32 +1,18 @@
 {
     "compilerOptions": {
         "module": "amd",
-        "target": "es5",
         "moduleResolution": "node",
-        "sourceMap": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": false,
-        "noImplicitAny": false,
-        "removeComments": true,
-        "noEmitHelpers": true,
-        "pretty": true,
-        "strictNullChecks": false,
-        "noResolve": false,
+        "target": "es5",
         "rootDir": "src/",
         "outDir": "dist/",
         "types": [
-            "vss-web-extension-sdk", 
-            "jquery"
-         ],
-         "typeRoots": [
-            "./node_modules/@types"
-         ],
+            "vss-web-extension-sdk",
+            "jquery", 
+            "q"
+        ],
         "lib": [
-            "es2018",
-            "es2018.promise",
+            "es2015.iterable",
             "es5",
-            "es6",
             "dom"
         ]
     },
@@ -36,9 +22,7 @@
     ],
     "exclude": [
         "node_modules",
-        "bower_components",
-        "typings/main",
-        "typings/main.d.ts"
-      ]
-    
+        "bower_components"
+    ]
+
 }

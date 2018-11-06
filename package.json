@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Henrick Poliquin",
   "license": "ISC",
   "dependencies": {
     "@types/q": "^1.5.1",
@@ -24,7 +24,7 @@
     "grunt-exec": "~3.0.0",
     "grunt-ts": "^6.0.0-beta.21",
     "rimraf": "^2.6.2",
-    "tfx-cli": "^0.6.3",
-    "typescript": "^3.1.6"
+    "typescript": "^2.3.4",
+    "tfx-cli": "^0.6.3"
   }
 }
