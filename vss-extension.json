@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.16",
+    "version": "0.1.25",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -38,11 +38,11 @@
     ],
     "files": [
         {
-            "path": "static/img",
+            "path": "dist",
             "addressable": true
         },
         {
-            "path": "static/toolbar.html",
+            "path": "static",
             "addressable": true
         },
         {
@@ -50,8 +50,15 @@
             "addressable": true
         },
         {
-            "path": "static/lib/VSS.SDK.min.js",
-            "addressable": true
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        }
+        ,
+        {
+            "path": "node_modules/bluebird/js/release",
+            "addressable": true,
+            "packagePath": "lib"
         }
     ]
 }

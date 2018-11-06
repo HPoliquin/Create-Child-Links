@@ -28,8 +28,9 @@
                 files: [{
                     expand: true, 
                     flatten: true, 
-                    src: ["node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js"], 
-                    dest: "static/lib",
+                    src: ["node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js", 
+                          "node_modules/bluebird/js/browser/bluebird.min.js"], 
+                    dest: "lib",
                     filter: "isFile" 
                 }]
             }

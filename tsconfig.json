@@ -6,17 +6,27 @@
         "sourceMap": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "removeComments": false,
+        "allowSyntheticDefaultImports": false,
         "noImplicitAny": false,
+        "removeComments": true,
+        "noEmitHelpers": true,
+        "pretty": true,
+        "strictNullChecks": false,
+        "noResolve": false,
         "rootDir": "src/",
         "outDir": "dist/",
         "types": [
-            "vss-web-extension-sdk",
+            "vss-web-extension-sdk", 
             "jquery"
-        ],
+         ],
+         "typeRoots": [
+            "./node_modules/@types"
+         ],
         "lib": [
-            "es2015.promise",
+            "es2018",
+            "es2018.promise",
             "es5",
+            "es6",
             "dom"
         ]
     },

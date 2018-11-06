@@ -11,10 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/jquery": "^3.3.22",
     "@types/q": "^1.5.1",
-    "vss-web-extension-sdk": "^5.141.0",
-    "requirejs": "^2.3.6"
+    "bluebird": "^3.5.2",
+    "requirejs": "^2.3.6",
+    "vss-web-extension-sdk": "^5.141.0"
   },
   "devDependencies": {
     "grunt": "^1.0.3",
