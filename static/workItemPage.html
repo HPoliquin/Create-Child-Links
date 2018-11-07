@@ -14,7 +14,16 @@
             usePlatformScripts: true
         });
 
+        // Load main entry point for extension 
+        VSS.require(["scripts/app","TFS/Dashboards/WidgetHelpers"], function (app, WidgetHelpers) {
+            // loading succeeded
+            WidgetHelpers.IncludeWidgetStyles();
+            VSS.notifyLoadSucceeded();
+        });
+
         VSS.ready(function () {
+            document.getElementById("name").innerText = VSS.getWebContext().user.name;
+
              // Register a listener for the work item page contribution.
             VSS.register(VSS.getContribution().id, function () {
                 return {
@@ -51,5 +60,37 @@
             });    
         });
      </script>
+
+<div class="widget-configuration">
+    <h1>Hello, <span id="name"></span></h1>
+
+    <div class="description">Select a board column and swimlane to move your work item.</p>
+
+        <div class="dropdown">
+            <label>Board column</label>
+            <div class="wrapper">
+                <select class="board-column-select">
+                </select>
+            </div>
+        </div>
+        <br />
+        <div class="dropdown">
+            <label>Doing or Done</label>
+            <div class="wrapper">
+                <select class="board-doing-done-select">
+                    <option value="Doing">Doing</option>
+                    <option value="Done">Done</option>
+                </select>
+            </div>
+        </div>
+        <br />
+        <div class="dropdown">
+            <label>Swimlane</label>
+            <div class="wrapper">
+                <select class="board-row-select">
+                </select>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
