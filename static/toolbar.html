@@ -27,7 +27,20 @@
                 // The actionContext parameter contains context data surrounding the circumstances of this
                 // action getting invoked.
                 execute: function (actionContext) {
-                    alert("Hello, " + VSS.getWebContext().user.name);
+                    VSS.getService(VSS.ServiceIds.Dialog).then(function(dialogService) {
+                        var extensionCtx = VSS.getExtensionContext();
+                        // Build absolute contribution ID for dialogContent
+                        var contributionId = extensionCtx.publisherId + "." + extensionCtx.extensionId + ".create-child-links-work-item-form-page";
+
+                        // Show dialog
+                        var dialogOptions = {
+                            title: "Create follow-up task in DSD team.",
+                            width: 800,
+                            height: 600
+                        };
+
+                        dialogService.openDialog(contributionId, dialogOptions);
+                    });
                 }
             };
         }());
@@ -36,13 +49,13 @@
         VSS.register("create-child-links-work-item-button", menuContributionHandler);
 
         VSS.ready(function () {
-            document.getElementById("name").innerText = VSS.getWebContext().user.name;
+            VSS.notifyLoadSucceeded();
         });
     </script>
 </head>
 
 <body>
-    <h1>Hello, <span id="name"></span></h1>
+
 </body>
 
 </html>
