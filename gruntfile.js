@@ -39,6 +39,7 @@
         ts: {
             default : {
                 src: ["src/**/*.ts"],
+                dest: "scripts",
                 tsconfig: true
             }
         },

@@ -3,7 +3,8 @@
 
 <head>
     <!-- VSS Framework -->
-    <script src="lib/VSS.SDK.min.js"></script>
+    <script src="../lib/VSS.SDK.min.js"></script>
+    <script src="../scripts/app.js"></script>
     <style>
         body {
             background-color: rgb(0, 67, 117);
@@ -19,21 +20,21 @@
             usePlatformStyles: true
         });
 
-        // // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
-        // var menuContributionHandler = (function () {
-        //     "use strict";
-        //     return {
-        //         // This is a callback that gets invoked when a user clicks the newly contributed menu item
-        //         // The actionContext parameter contains context data surrounding the circumstances of this
-        //         // action getting invoked.
-        //         execute: function (actionContext) {
-        //             alert("Hello, " + VSS.getWebContext().user.name);
-        //         }
-        //     };
-        // }());
+        // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
+        var menuContributionHandler = (function () {
+            "use strict";
+            return {
+                // This is a callback that gets invoked when a user clicks the newly contributed menu item
+                // The actionContext parameter contains context data surrounding the circumstances of this
+                // action getting invoked.
+                execute: function (actionContext) {
+                    alert("Hello, " + VSS.getWebContext().user.name);
+                }
+            };
+        }());
 
-        // // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
-        // VSS.register("create-child-links-work-item-button", menuContributionHandler);
+        // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
+        VSS.register("create-child-links-work-item-button", menuContributionHandler);
 
         // Load main entry point for extension 
         VSS.require(["TFS/Dashboards/WidgetHelpers"], function (WidgetHelpers) {
