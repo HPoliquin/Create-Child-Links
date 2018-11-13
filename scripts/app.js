@@ -46,6 +46,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/Services"], f
             $("div.title div.la-primary-data-title").text(myFields["System.Title"]);
             $("div.title span.la-primary-data-modified").text("Mise à jour de " + new Date(myFields["System.ChangedDate"]).toLocaleDateString());
             $("div.title span.la-primary-data-state").text(myFields["System.State"]);
+            $("div.title div.la-primary-data-title").html(myFields["System.WorkItemType"]);
         });
     });
 });

@@ -73,6 +73,7 @@ VSS.require(["TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/Services"], f
             $("div.title div.la-primary-data-title").text(myFields["System.Title"]); 
             $("div.title span.la-primary-data-modified").text("Mise à jour de " + new Date(myFields["System.ChangedDate"]).toLocaleDateString()); 
             $("div.title span.la-primary-data-state").text(myFields["System.State"]); 
+            $("div.title div.la-primary-data-title").html(myFields["System.WorkItemType"]); 
 
             //https://dev.azure.com/Cofomo-HPoliquin/_apis/wit/workitemicons/icon_test_case?color=660088&api-version=4.1-preview.1
         });
