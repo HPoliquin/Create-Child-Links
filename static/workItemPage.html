@@ -11,86 +11,167 @@
 
     <script>
         VSS.init({
-            usePlatformScripts: true
+            usePlatformScripts: true,
+            usePlatformStyles: true,
+            explicitNotifyLoaded: true
         });
 
         // Load main entry point for extension 
-        VSS.require(["scripts/app","TFS/Dashboards/WidgetHelpers"], function (app, WidgetHelpers) {
-            // loading succeeded
-            WidgetHelpers.IncludeWidgetStyles();
-            VSS.notifyLoadSucceeded();
+        VSS.require(["scripts/app", "TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/Services"], function (app, _WidgetHelpers, _WorkItemServices) {
+            VSS.notifyLoadSucceeded();            
         });
+    </script>
 
-        VSS.ready(function () {
-            document.getElementById("name").innerText = VSS.getWebContext().user.name;
+    <div class="widget">
+        <h1>Allo, <span id="name"></span></h1>
+        <h2 class="title">
+            <div class="inner-title">Vous ajoutez un lien à partir de&nbsp;:</div>
+        </h2>
+        <div class="content">
+                <span class="icon-container bowtie-icon bowtie-symbol-book" style="color: rgb(255, 20, 147);"></span>
+                <div class="title">
+                    <div class="la-main-component">
+                        <div class="la-list">
+                            <div class="la-list-group-noheader">
+                                <div class="la-item">
+                                    <div class="la-item-wrapper">
+                                        <div class="la-artifact-data">
+                                            <div class="la-primary-data">
+                                                <div class="la-user-icon"></div>
+                                                <div class="la-primary-data-id"></div>
+                                                <div class="la-primary-data-title"></div>
+                                            </div>
+                                            <div class="la-additional-data">
+                                                <div class="la-additional-data-item">
+                                                    <div class="ms-TooltipHost"><span class="la-text la-primary-data-modified"></span></div>
+                                                </div>
+                                                <span>, &nbsp; </span>
+                                                <div class="la-additional-data-item">
+                                                    <div class="ms-TooltipHost">
+                                                        <div class="ms-TooltipHost"><span class="la-color-circle" style="background-color: transparent; border-color: transparent;"></span></div><span
+                                                            class="la-text la-primary-data-state"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-             // Register a listener for the work item page contribution.
-            VSS.register(VSS.getContribution().id, function () {
-                return {
-                    // Called when the active work item is modified
-                    onFieldChanged: function(args) {
+            <button type="button" id="clickme">Click me!</button>
+            <div class="events"> </div>
 
-                    },
+            <div class="dialog modal-dialog link-dialog" style="width: 100%;">
+                    <div class="dropdown">
+                        <label>Type de lien</label>
+                        <div class="wrapper">
+                            <select class="linkdialog-linktype-select">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="section-title">
+                        <div class="bowtie-icon bowtie-map-destination-fill target-icon"></div>
+                        <label class="dialog-linkform-label inline-label" for="work-item-types">Type d'élément de travail</label>
+                        <div class="work-item-type-error-message"></div>
+                    </div>
+                    <div id="work-item-types" class="combo input-text-box link-dialog-title-combobox list drop">
+                        <div class="wrap"><input type="text" id="work-item-types_txt" autocomplete="off" title=""
+                                aria-expanded="false" role="combobox" aria-autocomplete="both"></div>
+                        <div class="drop bowtie-icon bowtie-chevron-down-light" role="button" aria-label="Développer"></div>
+                    </div>
+                    <label class="dialog-linkform-label" for="dialog-label">Titre</label>
+                    <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text" id="dialog-label">
+                    <div id="description" class="message"></div>
+                    <div>
+                        <div data-reactroot="" class="ltv-container">
+                            <table class="ltv-table-only-image">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="ms-TooltipHost host_02de3147">
+                                                <img src="/tfs/_static/tfs/Dev16.M122.7/_content/Work%2Fltv-network.png" id="img-network-nonDirectional"
+                                                    alt="Il s'agit d'un lien non directionnel qui peut être créé entre des ensembles d'éléments de travail"
+                                                    class="ltv-image" tabindex="0">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="multi-line-text-input">
+                        <label for="comment">Commentaires</label>
+                        <textarea id="comment" maxlength="255"></textarea>
+                    </div>
+                </div>
 
-                    // Called when a new work item is being loaded in the UI
-                    onLoaded: function (args) {
-
-                    },
-
-                    // Called when the active work item is being unloaded in the UI
-                    onUnloaded: function (args) {
-
-                    },
-
-                    // Called after the work item has been saved
-                    onSaved: function (args) {
-
-                    },
-
-                    // Called when the work item is reset to its unmodified state (undo)
-                    onReset: function (args) {
-
-                    },
-
-                    // Called when the work item has been refreshed from the server
-                    onRefreshed: function (args) {
-
-                    }
-                }
-            });    
-        });
-     </script>
-
-<div class="widget-configuration">
-    <h1>Hello, <span id="name"></span></h1>
-
-    <div class="description">Select a board column and swimlane to move your work item.</p>
-
-        <div class="dropdown">
-            <label>Board column</label>
-            <div class="wrapper">
-                <select class="board-column-select">
-                </select>
-            </div>
-        </div>
-        <br />
-        <div class="dropdown">
-            <label>Doing or Done</label>
-            <div class="wrapper">
-                <select class="board-doing-done-select">
-                    <option value="Doing">Doing</option>
-                    <option value="Done">Done</option>
-                </select>
-            </div>
-        </div>
-        <br />
-        <div class="dropdown">
-            <label>Swimlane</label>
-            <div class="wrapper">
-                <select class="board-row-select">
-                </select>
-            </div>
+            
         </div>
     </div>
+
+    <div class="widget-configuration">
+        <div class="description">Select a board column and swimlane to move your work item.</p>
+            <div>
+                <div data-reactroot="">
+                    <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
+                    <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
+                        <div>
+                            <div class="la-main-component">
+                                <!-- react-empty: 6 -->
+                                <div class="la-list">
+                                    <div class="la-list-group-noheader">
+                                        <div class="la-item">
+                                            <div class="la-item-wrapper">
+                                                <div class="la-artifact-data">
+                                                    <div class="la-primary-data">
+                                                        <div class="la-primary-icon">
+                                                            <div class="ms-TooltipHost host_02de3147"><span class="bowtie-icon bowtie-symbol-book"
+                                                                    style="color: rgb(255, 20, 147);"></span></div>
+                                                        </div>
+                                                        <div class="ms-TooltipHost host_02de3147">
+                                                            <div class="la-user-icon">
+                                                                {{"System.Title"}}
+                                                                <!-- <img alt="Henrick Poliquin <MJQ\POLH01>" src="/tfs/MJQ/_api/_common/IdentityImage?id=&amp;identifier=MJQ%5CPOLH01&amp;resolveAmbiguous=false&amp;identifierType=0&amp;size=0&amp;__v=5"> -->
+                                                            </div>
+                                                        </div>
+                                                        <div class="la-primary-data-id">
+                                                            <!-- react-text: 21 -->9911
+                                                            <!-- /react-text -->
+                                                            <!-- react-text: 22 -->&nbsp;
+                                                            <!-- /react-text -->
+                                                        </div>
+                                                        <div class="ms-TooltipHost host_02de3147"><a href="/tfs/MJQ/Entretien-Evolution/_workitems/edit/9911">15-Corrections
+                                                                d'encaissement qui ne sont pas présentées au M022L053</a></div>
+                                                    </div>
+                                                    <div class="la-additional-data">
+                                                        <div class="la-additional-data-item">
+                                                            <div class="ms-TooltipHost host_02de3147"><span class="la-text">Mise
+                                                                    à jour de 01/11/2018</span></div>
+                                                        </div><span>, &nbsp; </span>
+                                                        <div class="la-additional-data-item">
+                                                            <div class="ms-TooltipHost host_02de3147">
+                                                                <div class="ms-TooltipHost host_02de3147"><span class="la-color-circle"
+                                                                        style="background-color: transparent; border-color: transparent;"></span></div><span
+                                                                    class="la-text">Fermé</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
 </body>
+
 </html>

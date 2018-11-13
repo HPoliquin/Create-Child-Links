@@ -5,12 +5,15 @@
         "target": "es5",
         "rootDir": "src/",
         "outDir": "scripts/",
-        "typeRoots": [
-            "node_modules/@types",
-            "node_modules/@types2",
-            "typings/tsd.d.ts"
-          ],
-        "lib": ["es6", "dom", "es2015.iterable", "es2015.promise"]
+        "types": [
+            "vss-web-extension-sdk"
+        ],
+        "lib": [
+            "es6",
+            "dom",
+            "es2015.iterable",
+            "es2015.promise"
+        ]
     },
     "filesGlob": [
         "/src/**/*",
@@ -22,6 +25,7 @@
         "bower_components"
     ],
     "files": [
-        "src/app.ts"
+        "src/app.ts",
+        "src/teamname.ts"
     ]
 }

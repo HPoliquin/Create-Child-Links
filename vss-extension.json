@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.57",
+    "version": "0.1.80",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -46,6 +46,33 @@
                 "name": "My Page",
                 "uri": "static/workItemPage.html"
             } 
+        },
+        {  
+            "id": "create-child-links-work-item-form-control",
+            "type": "ms.vss-work-web.work-item-form-control",
+            "description": "Custom work item form control",
+            "targets": [
+                "ms.vss-work-web.work-item-form"
+            ],
+            "properties": {
+                "name": "Target project team",
+                "uri": "workItemControl.html",
+                "height": 600
+            },
+            "inputs": [
+                {
+                    "id": "create-child-links-work-item-form-control-teamname",
+                    "description": "target team project name.",
+                    "type": "WorkItemField",
+                    "properties": {
+                        "workItemFieldTypes": ["String"]
+                    },
+                    "validation": {
+                        "dataType": "String",
+                        "isRequired": true
+                    }
+                }
+            ]
         }
     ],
     "files": [
