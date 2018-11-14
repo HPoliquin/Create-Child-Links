@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.82",
+    "version": "0.1.113",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -15,6 +15,9 @@
     "icons": {
         "default": "static/img/one-click.png"
     },
+    "scopes": [
+        "vso.work", "vso.work_write", "vso.project"
+    ],
     "contributions": [
         {
             "id": "create-child-links-work-item-button",
