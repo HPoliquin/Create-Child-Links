@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.113",
+    "version": "0.1.144",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -84,9 +84,12 @@
             "addressable": true
         },
         {
-            "path": "src/app.ts",
-            "addressable": true,
-            "packagePath": "scripts/app.js"
+            "path": "scripts",
+            "addressable": true
+        },
+        {
+            "path": "src",
+            "addressable": true
         },
         {
             "path": "node_modules/vss-web-extension-sdk/lib",

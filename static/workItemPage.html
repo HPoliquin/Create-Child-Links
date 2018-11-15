@@ -1,321 +1,370 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Work item extension page sample</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <script src="../lib/VSS.SDK.min.js"></script>
 
     <script>
-        
-        VSS.init({
-            usePlatformScripts: true,
-            usePlatformStyles: true,
-            explicitNotifyLoaded: true
-        });
+      VSS.init({
+        usePlatformScripts: true,
+        usePlatformStyles: true,
+        explicitNotifyLoaded: true
+      });
 
-        // Load main entry point for extension 
-        VSS.require(["scripts/app", "TFS/Dashboards/WidgetHelpers", "TFS/WorkItemTracking/Services", "TFS/WorkItemTracking/RestClient"], function (app, _WidgetHelpers, _WorkItemServices, _WorkRestClient) {
-            _WidgetHelpers.IncludeWidgetStyles();
-            _WidgetHelpers.IncludeWidgetConfigurationStyles();
+      // Load main entry point for extension
+      VSS.require(
+        [
+          "scripts/app",
+          "TFS/Dashboards/WidgetHelpers",
+          "TFS/WorkItemTracking/Services",
+          "TFS/WorkItemTracking/RestClient"
+        ],
+        function(app, _WidgetHelpers, _WorkItemServices, _WorkRestClient) {
+          _WidgetHelpers.IncludeWidgetStyles();
+          _WidgetHelpers.IncludeWidgetConfigurationStyles();
 
-            var extensionCtx = VSS.getExtensionContext();
-            var webCtx = VSS.getWebContext();
-                        // Build absolute contribution ID for dialogContent
-            var contributionId = extensionCtx.publisherId + "." + extensionCtx.extensionId + ".create-child-links-work-item-form-page";
+          var extensionCtx = VSS.getExtensionContext();
+          var webCtx = VSS.getWebContext();
+          // Build absolute contribution ID for dialogContent
+          var contributionId =
+            extensionCtx.publisherId +
+            "." +
+            extensionCtx.extensionId +
+            ".create-child-links-work-item-form-page";
 
-            // Get the WorkItemFormService.  This service allows you to get/set fields/links on the 'active' work item (the work item
-            // that currently is displayed in the UI).
-            function getWorkItemFormService()
-            {
-                return _WorkItemServices.WorkItemFormService.getService();
+          // Get the WorkItemFormService.  This service allows you to get/set fields/links on the 'active' work item (the work item
+          // that currently is displayed in the UI).
+          function getWorkItemFormService() {
+            return _WorkItemServices.WorkItemFormService.getService();
+          }
+
+          // Register a listener for the work item group contribution.
+          VSS.register("create-child-links-work-item-form-page", function() {
+            var callbacks = [];
+
+            function inputChanged() {
+              // Execute registered callbacks
+              for (var i = 0; i < callbacks.length; i++) {
+                callbacks[i](isValid());
+              }
             }
 
-            // Register a listener for the work item group contribution.
-            VSS.register("create-child-links-work-item-form-page", function () {
-                var callbacks = [];
+            function isValid() {
+              // Check whether form is valid or not
+              let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
+                "selectedIndex"
+              );
+              let wittTpeIndex = $("select.linkdialog-wittype-select").prop(
+                "selectedIndex"
+              );
+              let titreLength = $("input#dialog-label").val().length;
+              return (
+                linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
+              ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
+            }
 
-                function inputChanged() {
-                    // Execute registered callbacks
-                    for(var i = 0; i < callbacks.length; i++) {
-                        callbacks[i](isValid());
-                    }
-                }
+            function getFormData() {
+              // Get form values
+              return {
+                linkType: $("select.linkdialog-linktype-select").val(),
+                witType: $("select.linkdialog-wittype-select").val(),
+                "System.Title": $("input#dialog-label").val(),
+                "System.Comment": $("textarea#comment").val()
+              };
+            }
 
-                function isValid() {
-                    // Check whether form is valid or not
-                    let linkTypeIndex = $("select.linkdialog-linktype-select").prop('selectedIndex');
-                    let wittTpeIndex = $("select.linkdialog-wittype-select").prop('selectedIndex');
-                    let titreLength = $("input#dialog-label").text().length;
-                    return linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength >= 0;//confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
-                }
+            return {
+              load: function(widgetSettings) {
+                var client = _WorkRestClient.getClient();
 
-                function getFormData() {
-                    // Get form values
-                    return {
-                        linkType: $("select.linkdialog-linktype-select").val(),
-                        witType: $("select.linkdialog-wittype-select").val(),
-                        titre: $("input#dialog-label").val(),
-                        commentaire: $("textarea#comment").val()
-                    };
-                }
+                client.getRelationTypes().then(function(relationsTypes) {
+                  relationsTypes.forEach(element => {
+                    $("select.linkdialog-linktype-select").append(
+                      $("<option>", {
+                        value: element.referenceName,
+                        text: element.name
+                      })
+                    );
+                  });
+                });
 
-                return {
-                    load: function (widgetSettings) {
-                        var $title = $('h2.title');
-                        $title.text('Hello World');
-                        console.log("load called");
+                client
+                  .getWorkItemTypes(webCtx.project.id)
+                  .then(function(witType) {
+                    witType.forEach(element => {
+                      $("select.linkdialog-wittype-select").append(
+                        $("<option>", {
+                          value: element.referenceName,
+                          text: element.name
+                        })
+                      );
+                    });
+                  });
 
-                        var client = _WorkRestClient.getClient();
-                        client.getRelationTypes().then(function(relationsTypes) {
-                                relationsTypes.forEach(element => {
-                                    $("select.linkdialog-linktype-select").append($('<option>', { 
-                                        value: element.referenceName,
-                                        text : element.name 
-                                    }));
-                                });
-                        });
+                $("select.linkdialog-linktype-select").bind(
+                  "change",
+                  inputChanged
+                );
+                $("select.linkdialog-wittype-select").bind(
+                  "change",
+                  inputChanged
+                );
+                $("input#dialog-label").bind("change", inputChanged);
+                $("textarea#comment").bind("change", inputChanged);
 
-                        client.getWorkItemTypes(webCtx.project.id).then(function(witType){
-                            witType.forEach(element => {
-                                $("select.linkdialog-wittype-select").append($('<option>', { 
-                                    value: element.referenceName,
-                                    text : element.name 
-                                }));
-                            });
-                        });
+                return _WidgetHelpers.WidgetStatusHelper.Success();
+              },
 
-                        $("select.linkdialog-linktype-select").bind("SelectedIndexChange", inputChanged);
-                        $("select.linkdialog-wittype-select").bind("SelectedIndexChange", inputChanged);
-                        $("input#dialog-label").bind("change", inputChanged);
-                        $("textarea#comment").bind("change", inputChanged);
+            //   // Called when a new work item is being loaded in the UI
+            //   onLoaded: function(args) {
+            //     getWorkItemFormService().then(function(service) {
+            //       // Get the current values for a few of the common fields
+            //       service
+            //         .getFieldValues([
+            //           "System.Id",
+            //           "System.Title",
+            //           "System.State",
+            //           "System.CreatedDate"
+            //         ])
+            //         .then(function(value) {
+            //           $(".events").append(
+            //             $("<div/>").text("onLoaded - " + JSON.stringify(value))
+            //           );
+            //         });
+            //     });
+            //   },
 
-                        return _WidgetHelpers.WidgetStatusHelper.Success();
-                    },
+            //   // Called when the active work item is modified
+            //   onFieldChanged: function(args) {
+            //     $(".events").append(
+            //       $("<div/>").text("onFieldChanged - " + JSON.stringify(args))
+            //     );
+            //   },
 
-                    
-                    // Called when a new work item is being loaded in the UI
-                    onLoaded: function (args) {
-                        getWorkItemFormService().then(function(service) {            
-                            // Get the current values for a few of the common fields
-                            service.getFieldValues(["System.Id", "System.Title", "System.State", "System.CreatedDate"]).then(
-                                function (value) {
-                                    $(".events").append($("<div/>").text("onLoaded - " + JSON.stringify(value)));
-                                });
-                        });
-                    },
-                    // Called when the active work item is modified
-                    onFieldChanged: function(args) {
-                        $(".events").append($("<div/>").text("onFieldChanged - " + JSON.stringify(args)));
-                    },
-                        
-                        // Called when the active work item is being unloaded in the UI
-                    onUnloaded: function (args) {
-                        $(".events").empty();
-                        $(".events").append($("<div/>").text("onUnloaded - " + JSON.stringify(args)));
-                    },
+            //   // Called when the active work item is being unloaded in the UI
+            //   onUnloaded: function(args) {
+            //     $(".events").empty();
+            //     $(".events").append(
+            //       $("<div/>").text("onUnloaded - " + JSON.stringify(args))
+            //     );
+            //   },
 
-                    // Called after the work item has been saved
-                    onSaved: function (args) {
-                        $(".events").append($("<div/>").text("onSaved - " + JSON.stringify(args)));
-                    },
+            //   // Called after the work item has been saved
+            //   onSaved: function(args) {
+            //     $(".events").append(
+            //       $("<div/>").text("onSaved - " + JSON.stringify(args))
+            //     );
+            //   },
 
-                    // Called when the work item is reset to its unmodified state (undo)
-                    onReset: function (args) {
-                        $(".events").append($("<div/>").text("onReset - " + JSON.stringify(args)));
-                    },
+            //   // Called when the work item is reset to its unmodified state (undo)
+            //   onReset: function(args) {
+            //     $(".events").append(
+            //       $("<div/>").text("onReset - " + JSON.stringify(args))
+            //     );
+            //   },
 
-                    // Called when the work item has been refreshed from the server
-                    onRefreshed: function (args) {
-                        $(".events").append($("<div/>").text("onRefreshed - " + JSON.stringify(args)));
-                    },
+            //   // Called when the work item has been refreshed from the server
+            //   onRefreshed: function(args) {
+            //     $(".events").append(
+            //       $("<div/>").text("onRefreshed - " + JSON.stringify(args))
+            //     );
+            //   },
 
-                    isFormValid: function() {
-                        return isValid();   
-                    },
+              isFormValid: function() {
+                return isValid();
+              },
 
-                    getFormData: function() {
-                        return getFormData();
-                    },
+              getFormData: function() {
+                return getFormData();
+              },
 
-                    attachFormChanged: function(cb) {
-                        callbacks.push(cb);
-                    }
-                }
-            });
+              attachFormChanged: function(cb) {
+                callbacks.push(cb);
+              }
+            };
+          });
 
-            VSS.notifyLoadSucceeded();            
-        });
+          VSS.notifyLoadSucceeded();
+        }
+      );
     </script>
 
     <div class="widget-configuration">
-        <div class="content">
-            <!-- <div class="bowtie-style">
-                <p class="link-dialog-description">Vous ajoutez un lien à partir de&nbsp;:</p>
-            </div>
-            <div class="title">
-                <div>
-                    <div>
-                        <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
-                        <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
-                            <div>
+      <div class="content">
+        <!--
+          <div class="bowtie-style">
+              <p class="link-dialog-description">Vous ajoutez un lien à partir de&nbsp;:</p>
+          </div>
+          <div class="title">
+              <div>
+                  <div>
+                      <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
+                      <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
+                          <div>
 
-                                <div class="la-main-component">
-                                    <div class="la-list">
-                                        <div class="la-list-group-noheader">
-                                            <div class="la-item">
-                                                <div class="la-item-wrapper">
-                                                    <div class="la-artifact-data">
-                                                        <div class="la-primary-data">
-                                                            <div class="la-primary-icon">
-                                                                <div class="ms-TooltipHost"><span class="bowtie-icon bowtie-symbol-bug"
-                                                                        style="color: rgb(204, 41, 61);"></span></div>
-                                                            </div>
-                                                            <div class="la-user-icon"></div>
-                                                            <div class="la-primary-data-id"></div>
-                                                            <div class="la-primary-data-title"></div>
-                                                        </div>
-                                                        <div class="la-additional-data">
-                                                            <div class="la-additional-data-item">
-                                                                <div class="ms-TooltipHost"><span class="la-text la-primary-data-modified"></span></div>
-                                                            </div>
-                                                            <span>, &nbsp; </span>
-                                                            <div class="la-additional-data-item">
-                                                                <div class="ms-TooltipHost">
-                                                                    <div class="ms-TooltipHost"><span class="la-color-circle"
-                                                                            style="background-color: transparent; border-color: transparent;"></span></div><span
-                                                                        class="la-text la-primary-data-state"></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                              <div class="la-main-component">
+                                  <div class="la-list">
+                                      <div class="la-list-group-noheader">
+                                          <div class="la-item">
+                                              <div class="la-item-wrapper">
+                                                  <div class="la-artifact-data">
+                                                      <div class="la-primary-data">
+                                                          <div class="la-primary-icon">
+                                                              <div class="ms-TooltipHost"><span class="bowtie-icon bowtie-symbol-bug"
+                                                                      style="color: rgb(204, 41, 61);"></span></div>
+                                                          </div>
+                                                          <div class="la-user-icon"></div>
+                                                          <div class="la-primary-data-id"></div>
+                                                          <div class="la-primary-data-title"></div>
+                                                      </div>
+                                                      <div class="la-additional-data">
+                                                          <div class="la-additional-data-item">
+                                                              <div class="ms-TooltipHost"><span class="la-text la-primary-data-modified"></span></div>
+                                                          </div>
+                                                          <span>, &nbsp; </span>
+                                                          <div class="la-additional-data-item">
+                                                              <div class="ms-TooltipHost">
+                                                                  <div class="ms-TooltipHost"><span class="la-color-circle"
+                                                                          style="background-color: transparent; border-color: transparent;"></span></div><span
+                                                                      class="la-text la-primary-data-state"></span>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
 
-            </div> -->
+          </div>
+        -->
 
-            <div class="events"> </div>
+        <div class="events"></div>
 
-            <div class="link-dialog-form-container bowtie">
-                <div class="dialog modal-dialog link-dialog" style="width: 100%;">
-                    <div class="dropdown">
-                        <label>Type de lien</label>
-                        <div class="wrapper">
-                            <select class="linkdialog-linktype-select"></select>
-                        </div>
-                    </div>
-
-                    <div class="dropdown">
-                            <label>Type d'élément de travail</label>
-                            <div class="wrapper">
-                                <select class="linkdialog-wittype-select"></select>
-                            </div>
-                        </div>
-
-                    <label class="dialog-linkform-label" for="dialog-label">Titre</label>
-                    <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text" id="dialog-label">
-                    <div id="description" class="message"></div>
-
-                    <!-- <div>
-                            <div data-reactroot="" class="ltv-container">
-                                <table class="ltv-table-only-image">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="ms-TooltipHost host_02de3147">
-                                                    <img src="/tfs/_static/tfs/Dev16.M122.7/_content/Work%2Fltv-network.png" id="img-network-nonDirectional"
-                                                        alt="Il s'agit d'un lien non directionnel qui peut être créé entre des ensembles d'éléments de travail"
-                                                        class="ltv-image" tabindex="0">
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div> -->
-
-                    <div class="multi-line-text-input">
-                        <label for="comment">Commentaires</label>
-                        <textarea id="comment" maxlength="255"></textarea>
-                    </div>
-                </div>
-
+        <div class="link-dialog-form-container bowtie">
+          <div class="dialog modal-dialog link-dialog" style="width: 100%;">
+            <div class="dropdown">
+              <label>Type de lien</label>
+              <div class="wrapper">
+                <select class="linkdialog-linktype-select"></select>
+              </div>
             </div>
 
+            <div class="dropdown">
+              <label>Type d'élément de travail</label>
+              <div class="wrapper">
+                <select class="linkdialog-wittype-select"></select>
+              </div>
+            </div>
 
+            <label class="dialog-linkform-label" for="dialog-label"
+              >Titre</label
+            >
+            <input
+              class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus"
+              type="text"
+              id="dialog-label"
+            />
+            <div id="description" class="message"></div>
+
+            <!--
+              <div>
+                  <div data-reactroot="" class="ltv-container">
+                      <table class="ltv-table-only-image">
+                          <tbody>
+                              <tr>
+                                  <td>
+                                      <div class="ms-TooltipHost host_02de3147">
+                                          <img src="/tfs/_static/tfs/Dev16.M122.7/_content/Work%2Fltv-network.png" id="img-network-nonDirectional"
+                                              alt="Il s'agit d'un lien non directionnel qui peut être créé entre des ensembles d'éléments de travail"
+                                              class="ltv-image" tabindex="0">
+                                      </div>
+                                  </td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+            -->
+
+            <div class="multi-line-text-input">
+              <label for="comment">Commentaires</label>
+              <textarea id="comment" maxlength="255" style="height: 150px;"></textarea>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- <div class="widget-configuration">
-        <div class="description">Select a board column and swimlane to move your work item.</p>
-            <div>
-                <div data-reactroot="">
-                    <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
-                    <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
-                        <div>
-                            <div class="la-main-component">
-                                <div class="la-list">
-                                    <div class="la-list-group-noheader">
-                                        <div class="la-item">
-                                            <div class="la-item-wrapper">
-                                                <div class="la-artifact-data">
-                                                    <div class="la-primary-data">
-                                                        <div class="la-primary-icon">
-                                                            <div class="ms-TooltipHost host_02de3147"><span class="bowtie-icon bowtie-symbol-book"
-                                                                    style="color: rgb(255, 20, 147);"></span></div>
-                                                        </div>
-                                                        <div class="ms-TooltipHost host_02de3147">
-                                                            <div class="la-user-icon">
-                                                                {{"System.Title"}}
-                                                                <img alt="Henrick Poliquin <MJQ\POLH01>" src="/tfs/MJQ/_api/_common/IdentityImage?id=&amp;identifier=MJQ%5CPOLH01&amp;resolveAmbiguous=false&amp;identifierType=0&amp;size=0&amp;__v=5">
-                                                            </div>
-                                                        </div>
-                                                        <div class="la-primary-data-id">
-                                                            9911
-                                                            
-                                                            &nbsp;
-                                                        </div>
-                                                        <div class="ms-TooltipHost host_02de3147"><a href="/tfs/MJQ/Entretien-Evolution/_workitems/edit/9911">15-Corrections
-                                                                d'encaissement qui ne sont pas présentées au M022L053</a></div>
-                                                    </div>
-                                                    <div class="la-additional-data">
-                                                        <div class="la-additional-data-item">
-                                                            <div class="ms-TooltipHost host_02de3147"><span class="la-text">Mise
-                                                                    à jour de 01/11/2018</span></div>
-                                                        </div><span>, &nbsp; </span>
-                                                        <div class="la-additional-data-item">
-                                                            <div class="ms-TooltipHost host_02de3147">
-                                                                <div class="ms-TooltipHost host_02de3147"><span class="la-color-circle"
-                                                                        style="background-color: transparent; border-color: transparent;"></span></div><span
-                                                                    class="la-text">Fermé</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!--
+      <div class="widget-configuration">
+      <div class="description">Select a board column and swimlane to move your work item.</p>
+          <div>
+              <div data-reactroot="">
+                  <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
+                  <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
+                      <div>
+                          <div class="la-main-component">
+                              <div class="la-list">
+                                  <div class="la-list-group-noheader">
+                                      <div class="la-item">
+                                          <div class="la-item-wrapper">
+                                              <div class="la-artifact-data">
+                                                  <div class="la-primary-data">
+                                                      <div class="la-primary-icon">
+                                                          <div class="ms-TooltipHost host_02de3147"><span class="bowtie-icon bowtie-symbol-book"
+                                                                  style="color: rgb(255, 20, 147);"></span></div>
+                                                      </div>
+                                                      <div class="ms-TooltipHost host_02de3147">
+                                                          <div class="la-user-icon">
+                                                              {{"System.Title"}}
+                                                              <img alt="Henrick Poliquin <MJQ\POLH01>" src="/tfs/MJQ/_api/_common/IdentityImage?id=&amp;identifier=MJQ%5CPOLH01&amp;resolveAmbiguous=false&amp;identifierType=0&amp;size=0&amp;__v=5">
+                                                          </div>
+                                                      </div>
+                                                      <div class="la-primary-data-id">
+                                                          9911
 
-            
-        </div> -->
-</body>
+                                                          &nbsp;
+                                                      </div>
+                                                      <div class="ms-TooltipHost host_02de3147"><a href="/tfs/MJQ/Entretien-Evolution/_workitems/edit/9911">15-Corrections
+                                                              d'encaissement qui ne sont pas présentées au M022L053</a></div>
+                                                  </div>
+                                                  <div class="la-additional-data">
+                                                      <div class="la-additional-data-item">
+                                                          <div class="ms-TooltipHost host_02de3147"><span class="la-text">Mise
+                                                                  à jour de 01/11/2018</span></div>
+                                                      </div><span>, &nbsp; </span>
+                                                      <div class="la-additional-data-item">
+                                                          <div class="ms-TooltipHost host_02de3147">
+                                                              <div class="ms-TooltipHost host_02de3147"><span class="la-color-circle"
+                                                                      style="background-color: transparent; border-color: transparent;"></span></div><span
+                                                                  class="la-text">Fermé</span>
+                                                          </div>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
 
+
+      </div>
+    -->
+  </body>
 </html>

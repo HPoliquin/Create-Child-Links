@@ -19,67 +19,98 @@
             usePlatformStyles: true
         });
 
-        // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
-        var menuContributionHandler = (function () {
-            "use strict";
-            return {
-                // This is a callback that gets invoked when a user clicks the newly contributed menu item
-                // The actionContext parameter contains context data surrounding the circumstances of this
-                // action getting invoked.
-                execute: function (actionContext) {
-                    let dialogReturn;
-                    VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
-                        var extensionCtx = VSS.getExtensionContext();
-                        // Build absolute contribution ID for dialogContent
-                        var contributionId = extensionCtx.publisherId + "." + extensionCtx.extensionId + ".create-child-links-work-item-form-page";
+        VSS.require(
+            [
+                "scripts/toolbarCreateWIT",
+                "TFS/WorkItemTracking/Services",
+                "TFS/WorkItemTracking/RestClient"
+            ],
+            function (toolbarCreateWIT, _WorkItemServices, _WorkRestClient) {
 
-                        // Show dialog
-                        var dialogOptions = {
-                            title: "Create follow-up task in DSD team.",
-                            width: 800,
-                            height: 600,
-                            getDialogResult: function () {
-                                // Get the result from registrationForm object
-                                return dialogReturn ? dialogReturn.getFormData() : null;
-                            },
-                            okCallback: function (result) {
-                                // Log the result to the console
-                                console.log(JSON.stringify(result));
-                            }
-                        };
+                console.log("REQUIRE LOADED");
 
-                        dialogService.openDialog(contributionId, dialogOptions).then(function(dialog) {
-                            // Get registrationForm instance which is registered in registrationFormContent.html
-                            dialog.getContributionInstance("create-child-links-work-item-form-page").then(function (
-                                registrationFormInstance) {
+                // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
+                var menuContributionHandler = (function (context) {
+                    "use strict";
+                    return {
+                        // This is a callback that gets invoked when a user clicks the newly contributed menu item
+                        // The actionContext parameter contains context data surrounding the circumstances of this
+                        // action getting invoked.
+                        execute: function (actionContext) {
 
-                                // Keep a reference of registration form instance (to be used above in dialog options)
-                                dialogReturn = registrationFormInstance;
+                            console.log("Create Child Links Clicked!");
 
-                                dialogReturn.load();
+                            let dialogReturn;
+                            VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
+                                var extensionCtx = VSS.getExtensionContext();
+                                // Build absolute contribution ID for dialogContent
+                                var contributionId = extensionCtx.publisherId + "." +
+                                    extensionCtx.extensionId +
+                                    ".create-child-links-work-item-form-page";
 
-                                // Subscribe to form input changes and update the Ok enabled state
-                                dialogReturn.attachFormChanged(function (isValid) {
-                                    dialog.updateOkButton(isValid);
-                                });
+                                // Show dialog
+                                var dialogOptions = {
+                                    title: "Create follow-up task in DSD team.",
+                                    width: 800,
+                                    height: 600,
+                                    getDialogResult: function () {
+                                        // Get the result from registrationForm object
+                                        return dialogReturn ? dialogReturn.getFormData() :
+                                            null;
+                                    },
+                                    okCallback: function (result) {
+                                        // Log the result to the console
+                                        console.log(JSON.stringify(result));
+                                        toolbarCreateWIT.create(actionContext, result);
+                                    }
+                                };
 
-                                // Set the initial ok enabled state
-                                dialogReturn.isFormValid().then(function (isValid) {
-                                    dialog.updateOkButton(isValid);
-                                });
+                                dialogService.openDialog(contributionId, dialogOptions).then(
+                                    function (
+                                        dialog) {
+                                        // Get registrationForm instance which is registered in registrationFormContent.html
+                                        dialog.getContributionInstance(
+                                            "create-child-links-work-item-form-page").then(
+                                            function (
+                                                registrationFormInstance) {
+
+                                                // Keep a reference of registration form instance (to be used above in dialog options)
+                                                dialogReturn = registrationFormInstance;
+
+                                                dialogReturn.load();
+
+                                                // Subscribe to form input changes and update the Ok enabled state
+                                                dialogReturn.attachFormChanged(function (
+                                                    isValid) {
+                                                    dialog.updateOkButton(
+                                                        isValid);
+                                                });
+
+                                                // Set the initial ok enabled state
+                                                dialogReturn.isFormValid().then(
+                                                    function (isValid) {
+                                                        dialog.updateOkButton(
+                                                            isValid);
+                                                    });
+                                            });
+                                    });
                             });
-                        });
-                    });
-                }
-            };
-        }());
+                        }
+                    };
+                });
 
-        // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
-        VSS.register("create-child-links-work-item-button", menuContributionHandler);
+                // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
+                //VSS.register(VSS.getContribution().id, menuContributionHandler);
 
-        VSS.ready(function () {
-            VSS.notifyLoadSucceeded();
-        });
+                console.log("Registering : create-child-links-work-item-button to : ", menuContributionHandler);
+                VSS.register("create-child-links-work-item-button", menuContributionHandler);
+
+                VSS.notifyLoadSucceeded();
+            }
+        );
+        // VSS.ready(function () {
+        //     VSS.notifyLoadSucceeded();
+        // });
     </script>
 </head>
 
