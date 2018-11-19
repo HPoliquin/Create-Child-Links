@@ -2,11 +2,11 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.144",
+    "version": "0.1.168",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
-    "categories": ["Repos"],
+    "categories": ["Azure Repos"],
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
@@ -16,7 +16,9 @@
         "default": "static/img/one-click.png"
     },
     "scopes": [
-        "vso.work", "vso.work_write", "vso.project"
+        "vso.work", 
+        "vso.work_write", 
+        "vso.project"
     ],
     "contributions": [
         {

@@ -55,6 +55,10 @@
 
             function isValid() {
               // Check whether form is valid or not
+              let teamIndex = $("select.linkdialog-team-select").prop(
+                "selectedIndex"
+              );
+
               let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
                 "selectedIndex"
               );
@@ -63,7 +67,7 @@
               );
               let titreLength = $("input#dialog-label").val().length;
               return (
-                linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
+                teamIndex > 0 && linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
               ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
             }
 
@@ -71,9 +75,11 @@
               // Get form values
               return {
                 linkType: $("select.linkdialog-linktype-select").val(),
-                witType: $("select.linkdialog-wittype-select").val(),
+                witType: $("select.linkdialog-wittype-select option:selected").html(),
                 "System.Title": $("input#dialog-label").val(),
-                "System.Comment": $("textarea#comment").val()
+                "System.Comment": $("textarea#comment").val(),
+                "Team": $("select.linkdialog-team-select option:selected").text(),
+                "TeamId": $("select.linkdialog-team-select").val()
               };
             }
 
@@ -83,12 +89,14 @@
 
                 client.getRelationTypes().then(function(relationsTypes) {
                   relationsTypes.forEach(element => {
-                    $("select.linkdialog-linktype-select").append(
-                      $("<option>", {
-                        value: element.referenceName,
-                        text: element.name
-                      })
-                    );
+                    if(element.attributes.enabled === true) {
+                      $("select.linkdialog-linktype-select").append(
+                        $("<option>", {
+                          value: element.referenceName,
+                          text: element.name
+                        })
+                      );
+                    }
                   });
                 });
 
@@ -96,12 +104,14 @@
                   .getWorkItemTypes(webCtx.project.id)
                   .then(function(witType) {
                     witType.forEach(element => {
-                      $("select.linkdialog-wittype-select").append(
-                        $("<option>", {
-                          value: element.referenceName,
-                          text: element.name
-                        })
-                      );
+                      if(element.isDisabled === false) {
+                        $("select.linkdialog-wittype-select").append(
+                          $("<option>", {
+                            value: element.referenceName,
+                            text: element.name
+                          })
+                        );
+                      }
                     });
                   });
 
@@ -253,6 +263,18 @@
 
         <div class="link-dialog-form-container bowtie">
           <div class="dialog modal-dialog link-dialog" style="width: 100%;">
+
+            <div class="dropdown">
+              <label>Équipe de DSD</label>
+              <div class="wrapper">
+                <select class="linkdialog-team-select">
+                  <option value="">Choisir l'équipe</option>
+                  <option value="7e4e37da-ea1f-4cf8-93fd-479468d393df">Base de données</option>
+                  <option value="56b42770-dc1b-41a8-a790-dd266bebaa65">Soutiens au développement</option>
+                </select>
+              </div>
+            </div>
+
             <div class="dropdown">
               <label>Type de lien</label>
               <div class="wrapper">

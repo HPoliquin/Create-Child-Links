@@ -7,3 +7,10 @@ categorie de work item : requirement
 typde de demande : 
 type d'élémemt de travail backlog de produit
 titre :   id - 
+
+
+
+requirement category     - type element child en francais...
+
+
+disponible seulement pour certains équipes.

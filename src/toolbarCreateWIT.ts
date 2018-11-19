@@ -4,6 +4,7 @@
 import * as _WorkItemServices from "TFS/WorkItemTracking/Services";
 import * as _WorkItemRestClient from "TFS/WorkItemTracking/RestClient";
 import * as workRestClient from "TFS/Work/RestClient";
+import * as coreRestClient from "TFS/Core/RestClient";
 // import * as Q from "Q";
 // import * as StatusIndicator from "VSS/Controls/StatusIndicator";
 // import * as Dialogs from "VSS/Controls/Dialogs";
@@ -66,9 +67,13 @@ import * as workRestClient from "TFS/Work/RestClient";
         //if (taskTemplate.fields['System.Title'] == null)
             workItem.push({ "op": "add", "path": "/fields/System.Title", "value": newWorkItemInfo['System.Title'] })
 
+        //if (taskTemplate.fields['System.History'] == null)
+            workItem.push({ "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] })
+
         // if template has no AreaPath field copies value from parent
         //if (taskTemplate.fields['System.AreaPath'] == null)
-            workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": currentWorkItem['System.AreaPath'] })
+            //workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": currentWorkItem['System.AreaPath'] })
+            workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamSettings.backlogIteration.name + "\\"+ newWorkItemInfo.Team })
 
         // if template has no IterationPath field copies value from parent
         // check if IterationPath field value is @currentiteration
@@ -76,11 +81,12 @@ import * as workRestClient from "TFS/Work/RestClient";
         //     workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": currentWorkItem['System.IterationPath'] })
         // else if (taskTemplate.fields['System.IterationPath'].toLowerCase() == '@currentiteration')
             workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name + teamSettings.defaultIteration.path })
+            //workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name })
 
         // check if AssignedTo field value is @me
         // if (taskTemplate.fields['System.AssignedTo'] != null) {
         //     if (taskTemplate.fields['System.AssignedTo'].toLowerCase() == '@me') {
-                workItem.push({ "op": "add", "path": "/fields/System.AssignedTo", "value": ctx.user.uniqueName })
+                // workItem.push({ "op": "add", "path": "/fields/System.AssignedTo", "value": ctx.user.uniqueName })
         //     }
         // }
 
@@ -91,24 +97,29 @@ import * as workRestClient from "TFS/Work/RestClient";
       service,
       currentWorkItem,
       teamSettings,
+      targetTeam,
+      targetTeamSettings,
       newWorkItemInfo
     ) {
       var witClient = _WorkItemRestClient.getClient();
 
       var newWorkItem = createWorkItemFromTemplate(
         currentWorkItem,
-        teamSettings,
+        targetTeamSettings,
         newWorkItemInfo
       );
 
-
+// VSS.getWebContext().project.name
+      console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
       witClient
         .createWorkItem(
           newWorkItem,
-          VSS.getWebContext().project.name,
+          targetTeam.project,
           newWorkItemInfo.witType
         )
         .then(function(response) {
+          console.log("Response : ", response);
+
           //Add relation
           if (service != null) {
             service.addWorkItemRelations([
@@ -120,7 +131,7 @@ import * as workRestClient from "TFS/Work/RestClient";
             //Save
             service.beginSaveWorkItem(
               function(response) {
-                //WriteLog(" Saved");
+                WriteLog(" Saved");
               },
               function(error) {
                 ShowDialog(" Error saving: " + response);
@@ -172,26 +183,46 @@ import * as workRestClient from "TFS/Work/RestClient";
             team: ctx.team.name
         }
 
+        var targetTeam = {
+          project: "DSD",
+          projectId: "8eefea83-2aa9-416a-90aa-2ab982c41229",
+          team: newWorkItemInfo.Team,
+          teamId: newWorkItemInfo.TeamId
+        }
+
+        var coreClient = coreRestClient.getClient();
+        coreClient.getProject(targetTeam.project).then(function(project) {
+          console.log("Target project :", project);
+          targetTeam.project = project.name;
+          targetTeam.projectId = project.id;
+
+          coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function(team){
+            targetTeam.team = team.name;
+            targetTeam.teamId = team.id;
+          });
+
+        });
+
         workClient.getTeamSettings(team)
                 .then(function (teamSettings) {
-                    // Get the current values for a few of the common fields
-                    witClient.getWorkItem(context.workItemId)
-                        .then(function (value) {
-                            var currentWorkItem = value.fields
 
-                            currentWorkItem['System.Id'] = context.workItemId;
+                    workClient.getTeamSettings(targetTeam).then(function(targetTeamSettings) {
 
-                            var workItemType = currentWorkItem["System.WorkItemType"];
-
-                            console.log("currentWorkItem" , currentWorkItem);
-
-                            getWorkItemFormService().then(function (service) {
-                              createWorkItem(service, currentWorkItem,  teamSettings, newWorkItemInfo);
-                            });
-
-                        })
-
-                    
+                      // Get the current values for a few of the common fields
+                      witClient.getWorkItem(context.workItemId)
+                          .then(function (value) {
+                              var currentWorkItem = value.fields
+  
+                              currentWorkItem['System.Id'] = context.workItemId;
+  
+                              //console.log("currentWorkItem" , currentWorkItem);
+  
+                              getWorkItemFormService().then(function (service) {
+                                createWorkItem(service, currentWorkItem,  teamSettings, targetTeam, targetTeamSettings, newWorkItemInfo);
+                              });
+  
+                          })
+                    });
                 })
 
         // getWorkItemFormService().then(function(service) {
