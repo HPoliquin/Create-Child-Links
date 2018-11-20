@@ -3,19 +3,28 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "grunt",
-            "task": "package-dev",
-            "problemMatcher": []
+            "label": "Grunt Package-Dev",
+            "command": "grunt",
+            "args": ["package-dev"],
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            }
         },
         {
-            "type": "grunt",
-            "task": "default",
-            "problemMatcher": []
+            "label": "Grunt Default",
+            "command": "grunt",
+            "args": ["default"],
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            }
         },
         {
-            "type": "grunt",
-            "task": "ts",
-            "problemMatcher": []
+            "label": "Grunt TS",
+            "command": "grunt",
+            "args": ["ts"],
+            "options": {
+                "cwd": "${workspaceRoot}/"
+            }
         },
         {
             "type": "typescript",

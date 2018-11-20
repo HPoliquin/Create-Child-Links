@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Work item extension page sample</title>
-  </head>
 
-  <body>
-    <script src="../lib/VSS.SDK.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <title>Work item extension page sample</title>
+</head>
 
-    <script>
-      VSS.init({
+<body>
+  <script src="../lib/VSS.SDK.min.js"></script>
+
+  <script>
+    VSS.init({
         usePlatformScripts: true,
         usePlatformStyles: true,
         explicitNotifyLoaded: true
@@ -21,9 +22,11 @@
           "scripts/app",
           "TFS/Dashboards/WidgetHelpers",
           "TFS/WorkItemTracking/Services",
-          "TFS/WorkItemTracking/RestClient"
+          "TFS/WorkItemTracking/RestClient",
+          "TFS/Core/RestClient",
+          "VSS/Controls"
         ],
-        function(app, _WidgetHelpers, _WorkItemServices, _WorkRestClient) {
+        function(app, _WidgetHelpers, _WorkItemServices, _WorkRestClient, _coreRestClient, _Controls ) {
           _WidgetHelpers.IncludeWidgetStyles();
           _WidgetHelpers.IncludeWidgetConfigurationStyles();
 
@@ -87,6 +90,69 @@
               load: function(widgetSettings) {
                 var client = _WorkRestClient.getClient();
 
+                var targetProjectName = "DSD";
+                var coreClient = _coreRestClient.getClient();
+                coreClient.getProject(targetProjectName).then(function(project) {
+                  coreClient.getTeams(project.id).then(function(teams){
+                    $("select.linkdialog-team-select").find('option')
+                                    .remove()
+                                    .end()
+                                    .append("<option>Choisir l'équipe</option>")
+                                    .val('');
+                    teams.forEach(team => {
+                      $("select.linkdialog-team-select").append(
+                        $("<option>", {
+                          value: team.id,
+                          text: team.name
+                        })
+                      );
+                    });
+                  });
+
+                  client
+                  .getWorkItemTypeCategories(project.id)
+                  .then(function(witCategories) {
+                      var category = witCategories.find(category => category.referenceName == "Microsoft.RequirementCategory");
+                      console.log("Category found :", category);
+                      if(category!=undefined)
+                      {
+                        category.workItemTypes.forEach(wit => {
+                          client
+                          .getWorkItemType(project.id, wit.name)
+                          .then(function(witType) {
+                              if(witType.isDisabled === false) {
+                                $("select.linkdialog-wittype-select").append(
+                                  $("<option>", {
+                                    value: witType.referenceName,
+                                    text: witType.name
+                                  })
+                                );
+                              }
+                          });
+                        });
+                      } else {
+                        client
+                        .getWorkItemTypes(project.id)
+                        .then(function(witType) {
+                          witType.forEach(element => {
+                            if(element.isDisabled === false) {
+                              $("select.linkdialog-wittype-select").append(
+                                $("<option>", {
+                                  value: element.referenceName,
+                                  text: element.name
+                                })
+                              );
+                            }
+                          });
+                        });
+                      }
+                  });
+
+                  
+
+
+                });
+
                 client.getRelationTypes().then(function(relationsTypes) {
                   relationsTypes.forEach(element => {
                     if(element.attributes.enabled === true) {
@@ -100,89 +166,23 @@
                   });
                 });
 
-                client
-                  .getWorkItemTypes(webCtx.project.id)
-                  .then(function(witType) {
-                    witType.forEach(element => {
-                      if(element.isDisabled === false) {
-                        $("select.linkdialog-wittype-select").append(
-                          $("<option>", {
-                            value: element.referenceName,
-                            text: element.name
-                          })
-                        );
-                      }
-                    });
-                  });
 
                 $("select.linkdialog-linktype-select").bind(
                   "change",
                   inputChanged
                 );
+
                 $("select.linkdialog-wittype-select").bind(
                   "change",
                   inputChanged
                 );
+
                 $("input#dialog-label").bind("change", inputChanged);
+
                 $("textarea#comment").bind("change", inputChanged);
 
                 return _WidgetHelpers.WidgetStatusHelper.Success();
               },
-
-            //   // Called when a new work item is being loaded in the UI
-            //   onLoaded: function(args) {
-            //     getWorkItemFormService().then(function(service) {
-            //       // Get the current values for a few of the common fields
-            //       service
-            //         .getFieldValues([
-            //           "System.Id",
-            //           "System.Title",
-            //           "System.State",
-            //           "System.CreatedDate"
-            //         ])
-            //         .then(function(value) {
-            //           $(".events").append(
-            //             $("<div/>").text("onLoaded - " + JSON.stringify(value))
-            //           );
-            //         });
-            //     });
-            //   },
-
-            //   // Called when the active work item is modified
-            //   onFieldChanged: function(args) {
-            //     $(".events").append(
-            //       $("<div/>").text("onFieldChanged - " + JSON.stringify(args))
-            //     );
-            //   },
-
-            //   // Called when the active work item is being unloaded in the UI
-            //   onUnloaded: function(args) {
-            //     $(".events").empty();
-            //     $(".events").append(
-            //       $("<div/>").text("onUnloaded - " + JSON.stringify(args))
-            //     );
-            //   },
-
-            //   // Called after the work item has been saved
-            //   onSaved: function(args) {
-            //     $(".events").append(
-            //       $("<div/>").text("onSaved - " + JSON.stringify(args))
-            //     );
-            //   },
-
-            //   // Called when the work item is reset to its unmodified state (undo)
-            //   onReset: function(args) {
-            //     $(".events").append(
-            //       $("<div/>").text("onReset - " + JSON.stringify(args))
-            //     );
-            //   },
-
-            //   // Called when the work item has been refreshed from the server
-            //   onRefreshed: function(args) {
-            //     $(".events").append(
-            //       $("<div/>").text("onRefreshed - " + JSON.stringify(args))
-            //     );
-            //   },
 
               isFormValid: function() {
                 return isValid();
@@ -197,15 +197,15 @@
               }
             };
           });
-
           VSS.notifyLoadSucceeded();
         }
       );
     </script>
 
-    <div class="widget-configuration">
-      <div class="content">
-        <!--
+  <div class="widget-configuration">
+    <div class="content">
+        <div class="current-work-item"></div>
+      <!--
           <div class="bowtie-style">
               <p class="link-dialog-description">Vous ajoutez un lien à partir de&nbsp;:</p>
           </div>
@@ -259,47 +259,35 @@
           </div>
         -->
 
-        <div class="events"></div>
+      <div class="link-dialog-form-container bowtie">
+        <div class="dialog modal-dialog link-dialog" style="width: 100%;">
 
-        <div class="link-dialog-form-container bowtie">
-          <div class="dialog modal-dialog link-dialog" style="width: 100%;">
-
-            <div class="dropdown">
-              <label>Équipe de DSD</label>
-              <div class="wrapper">
-                <select class="linkdialog-team-select">
-                  <option value="">Choisir l'équipe</option>
-                  <option value="7e4e37da-ea1f-4cf8-93fd-479468d393df">Base de données</option>
-                  <option value="56b42770-dc1b-41a8-a790-dd266bebaa65">Soutiens au développement</option>
-                </select>
-              </div>
+          <div class="dropdown">
+            <label>Équipe de DSD</label>
+            <div class="wrapper">
+              <select class="linkdialog-team-select"></select>
             </div>
+          </div>
 
-            <div class="dropdown">
-              <label>Type de lien</label>
-              <div class="wrapper">
-                <select class="linkdialog-linktype-select"></select>
-              </div>
+          <div class="dropdown">
+            <label>Type de lien</label>
+            <div class="wrapper">
+              <select class="linkdialog-linktype-select"></select>
             </div>
+          </div>
 
-            <div class="dropdown">
-              <label>Type d'élément de travail</label>
-              <div class="wrapper">
-                <select class="linkdialog-wittype-select"></select>
-              </div>
+          <div class="dropdown">
+            <label>Type d'élément de travail</label>
+            <div class="wrapper">
+              <select class="linkdialog-wittype-select"></select>
             </div>
+          </div>
 
-            <label class="dialog-linkform-label" for="dialog-label"
-              >Titre</label
-            >
-            <input
-              class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus"
-              type="text"
-              id="dialog-label"
-            />
-            <div id="description" class="message"></div>
+          <label class="dialog-linkform-label" for="dialog-label">Titre</label>
+          <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text" id="dialog-label" />
+          <div id="description" class="message"></div>
 
-            <!--
+          <!--
               <div>
                   <div data-reactroot="" class="ltv-container">
                       <table class="ltv-table-only-image">
@@ -319,16 +307,16 @@
               </div>
             -->
 
-            <div class="multi-line-text-input">
-              <label for="comment">Commentaires</label>
-              <textarea id="comment" maxlength="255" style="height: 150px;"></textarea>
-            </div>
+          <div class="multi-line-text-input">
+            <label for="comment">Commentaires</label>
+            <textarea id="comment" maxlength="255" style="height: 150px;"></textarea>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!--
+  <!--
       <div class="widget-configuration">
       <div class="description">Select a board column and swimlane to move your work item.</p>
           <div>
@@ -388,5 +376,6 @@
 
       </div>
     -->
-  </body>
+</body>
+
 </html>

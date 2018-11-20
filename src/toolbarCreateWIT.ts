@@ -5,35 +5,18 @@ import * as _WorkItemServices from "TFS/WorkItemTracking/Services";
 import * as _WorkItemRestClient from "TFS/WorkItemTracking/RestClient";
 import * as workRestClient from "TFS/Work/RestClient";
 import * as coreRestClient from "TFS/Core/RestClient";
+// import { Dialog } from "VSS/Controls/Dialogs";
 // import * as Q from "Q";
 // import * as StatusIndicator from "VSS/Controls/StatusIndicator";
-// import * as Dialogs from "VSS/Controls/Dialogs";
+import * as Dialogs from "VSS/Controls/Dialogs";
 // import * as Contracts from "VSS/WebApi/Contracts";
 
 
 
     var ctx = null;
 
-    function ShowDialog(message) {
-
-        var dialogOptions = {
-            title: "Create-Child-Links",
-            width: 300,
-            height: 200,
-            resizable: false,
-        };
-
-        VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogSvc) {
-
-            // dialogSvc.openMessageDialog(message, dialogOptions)
-            //     .then(function (dialog) {
-            //         //
-            //     }, function (dialog) {
-            //         //
-            //     });
-        });
-    }
-
+    var targetProjectName = "DSD";
+   
     function WriteLog(msg) {
         console.log('Create-Child-Links: ' + msg);
     }
@@ -128,13 +111,14 @@ import * as coreRestClient from "TFS/Core/RestClient";
                 url: response.url
               }
             ]);
+            service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
             //Save
             service.beginSaveWorkItem(
               function(response) {
                 WriteLog(" Saved");
               },
               function(error) {
-                ShowDialog(" Error saving: " + response);
+                WriteLog(" Error saving: " + response);
               }
             );
           } else {
@@ -151,7 +135,8 @@ import * as coreRestClient from "TFS/Core/RestClient";
                     isLocked: false
                   }
                 }
-              }
+              },
+              { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
             ];
 
             witClient
@@ -169,8 +154,6 @@ import * as coreRestClient from "TFS/Core/RestClient";
     }
 
     export function create(context, newWorkItemInfo) {
-        console.log("init toolbar code", context, newWorkItemInfo);
-
         var witClient = _WorkItemRestClient.getClient();
         var workClient = workRestClient.getClient();
 
@@ -184,15 +167,14 @@ import * as coreRestClient from "TFS/Core/RestClient";
         }
 
         var targetTeam = {
-          project: "DSD",
-          projectId: "8eefea83-2aa9-416a-90aa-2ab982c41229",
+          project: targetProjectName,
+          projectId: "",
           team: newWorkItemInfo.Team,
           teamId: newWorkItemInfo.TeamId
         }
 
         var coreClient = coreRestClient.getClient();
         coreClient.getProject(targetTeam.project).then(function(project) {
-          console.log("Target project :", project);
           targetTeam.project = project.name;
           targetTeam.projectId = project.id;
 
@@ -225,22 +207,4 @@ import * as coreRestClient from "TFS/Core/RestClient";
                     });
                 })
 
-        // getWorkItemFormService().then(function(service) {
-        //   service.hasActiveWorkItem().then(function success(response) {
-        //     if (response == true) {
-        //       //form is open
-        //       AddTasksOnForm(service);
-        //     } else {
-        //       // on grid
-        //       if (context.workItemIds && context.workItemIds.length > 0) {
-        //         context.workItemIds.forEach(function(workItemId) {
-        //           AddTasksOnGrid(workItemId);
-        //         });
-        //       } else if (context.id) {
-        //         var workItemId = context.id;
-        //         AddTasksOnGrid(workItemId);
-        //       }
-        //     }
-        //   });
-        // });
       }

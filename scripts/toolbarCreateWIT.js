@@ -2,16 +2,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ctx = null;
-    function ShowDialog(message) {
-        var dialogOptions = {
-            title: "Create-Child-Links",
-            width: 300,
-            height: 200,
-            resizable: false,
-        };
-        VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogSvc) {
-        });
-    }
+    var targetProjectName = "DSD";
     function WriteLog(msg) {
         console.log('Create-Child-Links: ' + msg);
     }
@@ -41,10 +32,11 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                         url: response.url
                     }
                 ]);
+                service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
                 service.beginSaveWorkItem(function (response) {
                     WriteLog(" Saved");
                 }, function (error) {
-                    ShowDialog(" Error saving: " + response);
+                    WriteLog(" Error saving: " + response);
                 });
             }
             else {
@@ -60,7 +52,8 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                                 isLocked: false
                             }
                         }
-                    }
+                    },
+                    { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
                 ];
                 witClient
                     .updateWorkItem(document, workItemId)
@@ -73,7 +66,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
         });
     }
     function create(context, newWorkItemInfo) {
-        console.log("init toolbar code", context, newWorkItemInfo);
         var witClient = _WorkItemRestClient.getClient();
         var workClient = workRestClient.getClient();
         ctx = VSS.getWebContext();
@@ -84,14 +76,13 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             team: ctx.team.name
         };
         var targetTeam = {
-            project: "DSD",
-            projectId: "8eefea83-2aa9-416a-90aa-2ab982c41229",
+            project: targetProjectName,
+            projectId: "",
             team: newWorkItemInfo.Team,
             teamId: newWorkItemInfo.TeamId
         };
         var coreClient = coreRestClient.getClient();
         coreClient.getProject(targetTeam.project).then(function (project) {
-            console.log("Target project :", project);
             targetTeam.project = project.name;
             targetTeam.projectId = project.id;
             coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function (team) {

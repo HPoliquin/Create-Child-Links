@@ -26,9 +26,6 @@
                 "TFS/WorkItemTracking/RestClient"
             ],
             function (toolbarCreateWIT, _WorkItemServices, _WorkRestClient) {
-
-                console.log("REQUIRE LOADED");
-
                 // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
                 var menuContributionHandler = (function (context) {
                     "use strict";
@@ -102,7 +99,6 @@
                 // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
                 //VSS.register(VSS.getContribution().id, menuContributionHandler);
 
-                console.log("Registering : create-child-links-work-item-button to : ", menuContributionHandler);
                 VSS.register("create-child-links-work-item-button", menuContributionHandler);
 
                 VSS.notifyLoadSucceeded();
@@ -115,6 +111,7 @@
 </head>
 
 <body>
+
 
 </body>
 
