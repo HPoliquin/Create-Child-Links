@@ -18,11 +18,14 @@
     "filesGlob": [
         "/src/**/*",
         "!**/*.tests.ts",
-        "!node_modules/**/*"
+        "!node_modules/**/*",
+        "!Graphics/**/*"
     ],
     "exclude": [
         "node_modules",
-        "bower_components"
+        "bower_components",
+        "static/**/*.xcf",
+        "Graphics"
     ],
     "files": [
         "src/app.ts",

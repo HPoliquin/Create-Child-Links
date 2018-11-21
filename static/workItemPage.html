@@ -114,31 +114,42 @@
                   .then(function(witCategories) {
                       var category = witCategories.find(category => category.referenceName == "Microsoft.RequirementCategory");
                       console.log("Category found :", category);
-                      if(category!=undefined)
+                      let witTypeAdded = 0;
+                      if(category!=undefined || category.workItemTypes.length == 0)
                       {
                         category.workItemTypes.forEach(wit => {
-                          client
-                          .getWorkItemType(project.id, wit.name)
-                          .then(function(witType) {
-                              if(witType.isDisabled === false) {
+                                witTypeAdded++;
                                 $("select.linkdialog-wittype-select").append(
                                   $("<option>", {
-                                    value: witType.referenceName,
-                                    text: witType.name
+                                    value: wit.name,
+                                    text: wit.name
                                   })
                                 );
-                              }
-                          });
+                          // client
+                          // .getWorkItemType(project.name, wit.name)
+                          // .then(function(witType) {
+                          //     if(witType.isDisabled === false) {
+                          //       witTypeAdded++;
+                          //       $("select.linkdialog-wittype-select").append(
+                          //         $("<option>", {
+                          //           value: witType.referenceName,
+                          //           text: witType.name
+                          //         })
+                          //       );
+                          //     }
+                          // });
                         });
-                      } else {
+                      } 
+                      if(witTypeAdded == 0) {
                         client
                         .getWorkItemTypes(project.id)
-                        .then(function(witType) {
-                          witType.forEach(element => {
+                        .then(function(witTypes) {
+                          console.log("witTypes : ", witTypes);
+                          witTypes.forEach(element => {
                             if(element.isDisabled === false) {
                               $("select.linkdialog-wittype-select").append(
                                 $("<option>", {
-                                  value: element.referenceName,
+                                  value: element.name,
                                   text: element.name
                                 })
                               );

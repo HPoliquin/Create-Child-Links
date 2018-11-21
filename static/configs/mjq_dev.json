@@ -1,0 +1,10 @@
+{
+    "id": "vsts-suivis-dsd-dev",
+    "name": "Creer suivis DSD",
+    "publisher": "mjq",
+    "description": "Creer un suivis de tâche dans une equipe DSD",
+    "categories": [
+        "Plan and track"
+    ],
+    "public": false
+}

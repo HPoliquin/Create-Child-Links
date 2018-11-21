@@ -9,60 +9,75 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     function getWorkItemFormService() {
         return _WorkItemServices.WorkItemFormService.getService();
     }
-    function createWorkItemFromTemplate(currentWorkItem, teamSettings, newWorkItemInfo) {
+    function createWorkItemFromTemplate(currentWorkItem, taskTemplate, teamSettings, newWorkItemInfo) {
         var workItem = [];
         workItem.push({ "op": "add", "path": "/fields/System.Title", "value": newWorkItemInfo['System.Title'] });
         workItem.push({ "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] });
         workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamSettings.backlogIteration.name + "\\" + newWorkItemInfo.Team });
         workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name + teamSettings.defaultIteration.path });
+        if (taskTemplate != undefined && taskTemplate.fieldInstances.find(function (f) { return f.referenceName == "Custom.Application"; }) != undefined) {
+            if (currentWorkItem["Custom.Application"] != undefined) {
+                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": currentWorkItem["Custom.Application"] });
+            }
+            else {
+                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": ctx.project.name });
+            }
+        }
+        else {
+            workItem.push({ "op": "add", "path": "/fields/System.Description", "value": ctx.project.name });
+        }
         return workItem;
     }
     function createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
-        var newWorkItem = createWorkItemFromTemplate(currentWorkItem, targetTeamSettings, newWorkItemInfo);
-        console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
         witClient
-            .createWorkItem(newWorkItem, targetTeam.project, newWorkItemInfo.witType)
-            .then(function (response) {
-            console.log("Response : ", response);
-            if (service != null) {
-                service.addWorkItemRelations([
-                    {
-                        rel: newWorkItemInfo.linkType,
-                        url: response.url
-                    }
-                ]);
-                service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
-                service.beginSaveWorkItem(function (response) {
-                    WriteLog(" Saved");
-                }, function (error) {
-                    WriteLog(" Error saving: " + response);
-                });
-            }
-            else {
-                var workItemId = currentWorkItem["System.Id"];
-                var document = [
-                    {
-                        op: "add",
-                        path: "/relations/-",
-                        value: {
+            .getWorkItemType(targetTeam.project, newWorkItemInfo.witType)
+            .then(function (witType) {
+            var newWorkItem = createWorkItemFromTemplate(currentWorkItem, witType, targetTeamSettings, newWorkItemInfo);
+            console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
+            witClient
+                .createWorkItem(newWorkItem, targetTeam.project, newWorkItemInfo.witType)
+                .then(function (response) {
+                console.log("Response : ", response);
+                if (service != null) {
+                    service.addWorkItemRelations([
+                        {
                             rel: newWorkItemInfo.linkType,
-                            url: response.url,
-                            attributes: {
-                                isLocked: false
-                            }
+                            url: response.url
                         }
-                    },
-                    { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
-                ];
-                witClient
-                    .updateWorkItem(document, workItemId)
-                    .then(function (response) {
-                    var a = response;
-                    VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
+                    ]);
+                    service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
+                    service.beginSaveWorkItem(function (response) {
+                        WriteLog(" Saved");
+                    }, function (error) {
+                        WriteLog(" Error saving: " + response);
                     });
-                });
-            }
+                }
+                else {
+                    var workItemId = currentWorkItem["System.Id"];
+                    var document = [
+                        {
+                            op: "add",
+                            path: "/relations/-",
+                            value: {
+                                rel: newWorkItemInfo.linkType,
+                                url: response.url,
+                                attributes: {
+                                    isLocked: false
+                                }
+                            }
+                        },
+                        { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
+                    ];
+                    witClient
+                        .updateWorkItem(document, workItemId)
+                        .then(function (response) {
+                        var a = response;
+                        VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
+                        });
+                    });
+                }
+            });
         });
     }
     function create(context, newWorkItemInfo) {

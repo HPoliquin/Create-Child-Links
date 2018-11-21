@@ -9,6 +9,8 @@ import * as coreRestClient from "TFS/Core/RestClient";
 // import * as Q from "Q";
 // import * as StatusIndicator from "VSS/Controls/StatusIndicator";
 import * as Dialogs from "VSS/Controls/Dialogs";
+import { TemplateType, WorkItemType } from "TFS/WorkItemTracking/Contracts";
+import { FieldType } from "TFS/Work/Contracts";
 // import * as Contracts from "VSS/WebApi/Contracts";
 
 
@@ -25,7 +27,7 @@ import * as Dialogs from "VSS/Controls/Dialogs";
       return _WorkItemServices.WorkItemFormService.getService();
     }
 
-    function createWorkItemFromTemplate(currentWorkItem, teamSettings, newWorkItemInfo) {
+    function createWorkItemFromTemplate(currentWorkItem, taskTemplate : WorkItemType,  teamSettings, newWorkItemInfo) {
         var workItem = [];
 
         // for (var key in taskTemplate.fields) {
@@ -66,6 +68,17 @@ import * as Dialogs from "VSS/Controls/Dialogs";
             workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name + teamSettings.defaultIteration.path })
             //workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name })
 
+            if(taskTemplate != undefined && taskTemplate.fieldInstances.find(f => { return f.referenceName == "Custom.Application"; }) != undefined){
+              if(currentWorkItem["Custom.Application"] != undefined) {
+                // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
+                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": currentWorkItem["Custom.Application"] })
+              } else {
+                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": ctx.project.name })
+              }
+            } else {
+              workItem.push({ "op": "add", "path": "/fields/System.Description", "value": ctx.project.name })
+            }
+              
         // check if AssignedTo field value is @me
         // if (taskTemplate.fields['System.AssignedTo'] != null) {
         //     if (taskTemplate.fields['System.AssignedTo'].toLowerCase() == '@me') {
@@ -86,71 +99,79 @@ import * as Dialogs from "VSS/Controls/Dialogs";
     ) {
       var witClient = _WorkItemRestClient.getClient();
 
-      var newWorkItem = createWorkItemFromTemplate(
-        currentWorkItem,
-        targetTeamSettings,
-        newWorkItemInfo
-      );
-
-// VSS.getWebContext().project.name
-      console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
       witClient
-        .createWorkItem(
-          newWorkItem,
-          targetTeam.project,
-          newWorkItemInfo.witType
-        )
-        .then(function(response) {
-          console.log("Response : ", response);
+              .getWorkItemType(targetTeam.project, newWorkItemInfo.witType)
+              .then(function(witType : WorkItemType) {
+                  var newWorkItem = createWorkItemFromTemplate(
+                    currentWorkItem,
+                    witType,
+                    targetTeamSettings,
+                    newWorkItemInfo
+                  );
 
-          //Add relation
-          if (service != null) {
-            service.addWorkItemRelations([
-              {
-                rel: newWorkItemInfo.linkType,
-                url: response.url
-              }
-            ]);
-            service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
-            //Save
-            service.beginSaveWorkItem(
-              function(response) {
-                WriteLog(" Saved");
-              },
-              function(error) {
-                WriteLog(" Error saving: " + response);
-              }
-            );
-          } else {
-            //save using RestClient
-            var workItemId = currentWorkItem["System.Id"];
-            var document = [
-              {
-                op: "add",
-                path: "/relations/-",
-                value: {
-                  rel: newWorkItemInfo.linkType,
-                  url: response.url,
-                  attributes: {
-                    isLocked: false
-                  }
-                }
-              },
-              { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
-            ];
-
-            witClient
-              .updateWorkItem(document, workItemId)
-              .then(function(response) {
-                var a = response;
-                VSS.getService(VSS.ServiceIds.Navigation).then(function(
-                  navigationService
-                ) {
-                  //navigationService.relaod();
-                });
+                  console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
+                  witClient
+                    .createWorkItem(
+                      newWorkItem,
+                      targetTeam.project,
+                      newWorkItemInfo.witType
+                    )
+                    .then(function(response) {
+                      console.log("Response : ", response);
+            
+                      //Add relation
+                      if (service != null) {
+                        service.addWorkItemRelations([
+                          {
+                            rel: newWorkItemInfo.linkType,
+                            url: response.url
+                          }
+                        ]);
+                        service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
+                        //Save
+                        service.beginSaveWorkItem(
+                          function(response) {
+                            WriteLog(" Saved");
+                          },
+                          function(error) {
+                            WriteLog(" Error saving: " + response);
+                          }
+                        );
+                      } else {
+                        //save using RestClient
+                        var workItemId = currentWorkItem["System.Id"];
+                        var document = [
+                          {
+                            op: "add",
+                            path: "/relations/-",
+                            value: {
+                              rel: newWorkItemInfo.linkType,
+                              url: response.url,
+                              attributes: {
+                                isLocked: false
+                              }
+                            }
+                          },
+                          { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
+                        ];
+            
+                        witClient
+                          .updateWorkItem(document, workItemId)
+                          .then(function(response) {
+                            var a = response;
+                            VSS.getService(VSS.ServiceIds.Navigation).then(function(
+                              navigationService
+                            ) {
+                              //navigationService.relaod();
+                            });
+                          });
+                      }
+                    });
               });
-          }
-        });
+
+      
+
+
     }
 
     export function create(context, newWorkItemInfo) {
@@ -193,7 +214,7 @@ import * as Dialogs from "VSS/Controls/Dialogs";
                       // Get the current values for a few of the common fields
                       witClient.getWorkItem(context.workItemId)
                           .then(function (value) {
-                              var currentWorkItem = value.fields
+                              var currentWorkItem = value.fields;
   
                               currentWorkItem['System.Id'] = context.workItemId;
   

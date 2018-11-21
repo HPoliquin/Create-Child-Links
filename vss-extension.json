@@ -2,11 +2,10 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.183",
+    "version": "0.1.215",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
-    "categories": ["Azure Repos"],
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
@@ -32,7 +31,7 @@
             "properties": {
                 "name": "Create Child Links",
                 "uri": "static/toolbar.html",
-                "text": "Create work item child links",
+                "text": "Créer tâche Suivis DSD",
                 "title": "Create child links",
                 "toolbarText": "Create child links",
                 "icon": "static/img/one-click16.png",
@@ -51,33 +50,6 @@
                 "name": "My Page",
                 "uri": "static/workItemPage.html"
             } 
-        },
-        {  
-            "id": "create-child-links-work-item-form-control",
-            "type": "ms.vss-work-web.work-item-form-control",
-            "description": "Custom work item form control",
-            "targets": [
-                "ms.vss-work-web.work-item-form"
-            ],
-            "properties": {
-                "name": "Target project team",
-                "uri": "workItemControl.html",
-                "height": 600
-            },
-            "inputs": [
-                {
-                    "id": "create-child-links-work-item-form-control-teamname",
-                    "description": "target team project name.",
-                    "type": "WorkItemField",
-                    "properties": {
-                        "workItemFieldTypes": ["String"]
-                    },
-                    "validation": {
-                        "dataType": "String",
-                        "isRequired": true
-                    }
-                }
-            ]
         }
     ],
     "files": [

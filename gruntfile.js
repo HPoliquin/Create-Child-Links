@@ -1,6 +1,11 @@
 ﻿module.exports = function (grunt) {
     grunt.initConfig({
         exec: {
+            mjq_dev: {
+                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_dev.json --output-path dist" ,
+                stdout: true,
+                stderr: true
+            },
             package_dev: {
                 command: "tfx extension create --rev-version --manifests vss-extension.json --overrides-file static/configs/dev.json --output-path dist" ,
                 stdout: true,
@@ -54,6 +59,7 @@
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks("grunt-ts");
 
+    grunt.registerTask("mjq-dev", ["copy", "exec:package_dev", "exec:mjq_dev"]);
     grunt.registerTask("package-dev", ["copy", "exec:package_dev"]);
     grunt.registerTask("package-release", ["copy", "exec:package_release"]);
     grunt.registerTask("publish-dev", ["package-dev", "exec:publish_dev"]);        

@@ -1,5 +1,6 @@
 {
     "id": "vsts-work-item-create-child-links-dev",
     "name": "Create Child links",
+    "categories": ["Azure Repos"],
     "public": false
 }
