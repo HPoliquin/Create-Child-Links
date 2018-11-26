@@ -2,7 +2,7 @@
     "id": "vsts-suivis-dsd-dev",
     "name": "Creer suivis DSD",
     "publisher": "mjq",
-    "description": "Creer un suivis de tâche dans une equipe DSD",
+    "description": "Créer une demande de soutien DSD",
     "categories": [
         "Plan and track"
     ],

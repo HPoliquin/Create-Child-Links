@@ -166,7 +166,9 @@
 
                 client.getRelationTypes().then(function(relationsTypes) {
                   relationsTypes.forEach(element => {
-                    if(element.attributes.enabled === true) {
+                    // Limit to Child link type
+                    if(element.attributes.enabled === true 
+                        && element.referenceName == "System.LinkTypes.Hierarchy-Forward") {
                       $("select.linkdialog-linktype-select").append(
                         $("<option>", {
                           value: element.referenceName,

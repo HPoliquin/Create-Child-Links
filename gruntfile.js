@@ -60,7 +60,7 @@
     grunt.loadNpmTasks("grunt-ts");
 
     grunt.registerTask("mjq-dev", ["copy", "exec:package_dev", "exec:mjq_dev"]);
-    grunt.registerTask("package-dev", ["copy", "exec:package_dev"]);
+    grunt.registerTask("package-dev", ["copy", "ts", "exec:package_dev"]);
     grunt.registerTask("package-release", ["copy", "exec:package_release"]);
     grunt.registerTask("publish-dev", ["package-dev", "exec:publish_dev"]);        
     grunt.registerTask("publish-release", ["package-release", "exec:publish_release"]);        

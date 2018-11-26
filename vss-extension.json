@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.215",
+    "version": "0.1.234",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -31,9 +31,9 @@
             "properties": {
                 "name": "Create Child Links",
                 "uri": "static/toolbar.html",
-                "text": "Créer tâche Suivis DSD",
+                "text": "Créer une demande de soutien DSD",
                 "title": "Create child links",
-                "toolbarText": "Create child links",
+                "toolbarText": "Créer une demande de soutien DSD",
                 "icon": "static/img/one-click16.png",
                 "groupId": "actions",
                 "registeredObjectId": "create-child-links-work-item-button"

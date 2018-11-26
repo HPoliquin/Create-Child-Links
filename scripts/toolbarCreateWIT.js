@@ -9,11 +9,22 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     function getWorkItemFormService() {
         return _WorkItemServices.WorkItemFormService.getService();
     }
-    function createWorkItemFromTemplate(currentWorkItem, taskTemplate, teamSettings, newWorkItemInfo) {
+    function IsPropertyValid(taskTemplate, key) {
+        if (taskTemplate.fields.hasOwnProperty(key) == false) {
+            return false;
+        }
+        if (key.indexOf('System.Tags') >= 0) {
+            return false;
+        }
+        return true;
+    }
+    function createWorkItemFromTemplate(currentWorkItem, taskTemplate, teamSettings, teamAreaPath, newWorkItemInfo) {
         var workItem = [];
         workItem.push({ "op": "add", "path": "/fields/System.Title", "value": newWorkItemInfo['System.Title'] });
         workItem.push({ "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] });
-        workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamSettings.backlogIteration.name + "\\" + newWorkItemInfo.Team });
+        {
+            workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamAreaPath });
+        }
         workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name + teamSettings.defaultIteration.path });
         if (taskTemplate != undefined && taskTemplate.fieldInstances.find(function (f) { return f.referenceName == "Custom.Application"; }) != undefined) {
             if (currentWorkItem["Custom.Application"] != undefined) {
@@ -28,15 +39,15 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
         }
         return workItem;
     }
-    function createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, newWorkItemInfo) {
+    function createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
         witClient
             .getWorkItemType(targetTeam.project, newWorkItemInfo.witType)
             .then(function (witType) {
-            var newWorkItem = createWorkItemFromTemplate(currentWorkItem, witType, targetTeamSettings, newWorkItemInfo);
+            var newWorkItem = createWorkItemFromTemplate(currentWorkItem, witType, targetTeamSettings, teamAreaPath, newWorkItemInfo);
             console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
             witClient
-                .createWorkItem(newWorkItem, targetTeam.project, newWorkItemInfo.witType)
+                .createWorkItem(newWorkItem, targetTeam.project, witType.referenceName)
                 .then(function (response) {
                 console.log("Response : ", response);
                 if (service != null) {
@@ -107,13 +118,17 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
         });
         workClient.getTeamSettings(team)
             .then(function (teamSettings) {
-            workClient.getTeamSettings(targetTeam).then(function (targetTeamSettings) {
-                witClient.getWorkItem(context.workItemId)
-                    .then(function (value) {
-                    var currentWorkItem = value.fields;
-                    currentWorkItem['System.Id'] = context.workItemId;
-                    getWorkItemFormService().then(function (service) {
-                        createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, newWorkItemInfo);
+            workClient.getTeamFieldValues(targetTeam).then(function (teamFields) {
+                return teamFields.defaultValue;
+            }).then(function (teamAreaPath) {
+                workClient.getTeamSettings(targetTeam).then(function (targetTeamSettings) {
+                    witClient.getWorkItem(context.workItemId)
+                        .then(function (value) {
+                        var currentWorkItem = value.fields;
+                        currentWorkItem['System.Id'] = context.workItemId;
+                        getWorkItemFormService().then(function (service) {
+                            createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
+                        });
                     });
                 });
             });

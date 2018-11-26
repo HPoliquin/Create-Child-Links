@@ -9,8 +9,8 @@ import * as coreRestClient from "TFS/Core/RestClient";
 // import * as Q from "Q";
 // import * as StatusIndicator from "VSS/Controls/StatusIndicator";
 import * as Dialogs from "VSS/Controls/Dialogs";
-import { TemplateType, WorkItemType } from "TFS/WorkItemTracking/Contracts";
-import { FieldType } from "TFS/Work/Contracts";
+import { TemplateType, WorkItemType, WorkItem } from "TFS/WorkItemTracking/Contracts";
+import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
 // import * as Contracts from "VSS/WebApi/Contracts";
 
 
@@ -27,23 +27,31 @@ import { FieldType } from "TFS/Work/Contracts";
       return _WorkItemServices.WorkItemFormService.getService();
     }
 
-    function createWorkItemFromTemplate(currentWorkItem, taskTemplate : WorkItemType,  teamSettings, newWorkItemInfo) {
+    function IsPropertyValid(taskTemplate, key) {
+      if (taskTemplate.fields.hasOwnProperty(key) == false) {
+          return false;
+      }
+      if (key.indexOf('System.Tags') >= 0) { //not supporting tags for now
+          return false;
+      }
+
+      return true;
+  }
+
+    function createWorkItemFromTemplate(currentWorkItem: WorkItem, taskTemplate : WorkItemType,  teamSettings : TeamSetting, teamAreaPath: string, newWorkItemInfo) {
         var workItem = [];
 
         // for (var key in taskTemplate.fields) {
         //     if (IsPropertyValid(taskTemplate, key)) {
         //         //if field value is empty copies value from parent
-        //         if (taskTemplate.fields[key] == '') {
-        //             if (currentWorkItem[key] != null) {
-        //                 workItem.push({ "op": "add", "path": "/fields/" + key, "value": currentWorkItem[key] })
+        //         if(taskTemplate != undefined && (taskTemplate.fieldInstances[key].defaultValue == '' || taskTemplate.fieldInstances[key].defaultValue == null)){
+        //             if (currentWorkItem[taskTemplate.fieldInstances[key].referenceName] != null) {
+        //                 workItem.push({ "op": "add", "path": "/fields/" + taskTemplate.fieldInstances[key].referenceName, "value": currentWorkItem[taskTemplate.fieldInstances[key].referenceName] })
         //             }
         //         }
         //         else {
-        //             var fieldValue = taskTemplate.fields[key];
-        //             //check for references to parent fields - {fieldName}
-        //             fieldValue = replaceReferenceToParentField(fieldValue, currentWorkItem);
-                    
-        //             workItem.push({ "op": "add", "path": "/fields/" + key, "value": fieldValue })
+        //             var fieldValue = taskTemplate.fieldInstances[key];
+        //             workItem.push({ "op": "add", "path": "/fields/" + fieldValue.referenceName, "value": fieldValue.defaultValue })
         //         }
         //     }
         // }
@@ -56,9 +64,8 @@ import { FieldType } from "TFS/Work/Contracts";
             workItem.push({ "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] })
 
         // if template has no AreaPath field copies value from parent
-        //if (taskTemplate.fields['System.AreaPath'] == null)
-            //workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": currentWorkItem['System.AreaPath'] })
-            workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamSettings.backlogIteration.name + "\\"+ newWorkItemInfo.Team })
+        //if (taskTemplate.fieldInstances.find(f => { return f.referenceName == "System.AreaPath"; }) != undefined)
+            {workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamAreaPath });}
 
         // if template has no IterationPath field copies value from parent
         // check if IterationPath field value is @currentiteration
@@ -92,9 +99,10 @@ import { FieldType } from "TFS/Work/Contracts";
     function createWorkItem(
       service,
       currentWorkItem,
-      teamSettings,
+      teamSettings: TeamSetting,
       targetTeam,
-      targetTeamSettings,
+      targetTeamSettings: TeamSetting,
+      teamAreaPath: string,
       newWorkItemInfo
     ) {
       var witClient = _WorkItemRestClient.getClient();
@@ -106,6 +114,7 @@ import { FieldType } from "TFS/Work/Contracts";
                     currentWorkItem,
                     witType,
                     targetTeamSettings,
+                    teamAreaPath,
                     newWorkItemInfo
                   );
 
@@ -114,7 +123,7 @@ import { FieldType } from "TFS/Work/Contracts";
                     .createWorkItem(
                       newWorkItem,
                       targetTeam.project,
-                      newWorkItemInfo.witType
+                      witType.referenceName
                     )
                     .then(function(response) {
                       console.log("Response : ", response);
@@ -207,10 +216,12 @@ import { FieldType } from "TFS/Work/Contracts";
         });
 
         workClient.getTeamSettings(team)
-                .then(function (teamSettings) {
+                .then(function (teamSettings: TeamSetting) {
 
+                  workClient.getTeamFieldValues(targetTeam).then(function(teamFields: TeamFieldValues){
+                    return teamFields.defaultValue;
+                  }).then(function(teamAreaPath){
                     workClient.getTeamSettings(targetTeam).then(function(targetTeamSettings) {
-
                       // Get the current values for a few of the common fields
                       witClient.getWorkItem(context.workItemId)
                           .then(function (value) {
@@ -221,11 +232,12 @@ import { FieldType } from "TFS/Work/Contracts";
                               //console.log("currentWorkItem" , currentWorkItem);
   
                               getWorkItemFormService().then(function (service) {
-                                createWorkItem(service, currentWorkItem,  teamSettings, targetTeam, targetTeamSettings, newWorkItemInfo);
+                                createWorkItem(service, currentWorkItem,  teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
                               });
   
                           })
                     });
+                  });
                 })
 
       }
