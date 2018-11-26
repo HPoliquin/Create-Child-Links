@@ -47,7 +47,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             var newWorkItem = createWorkItemFromTemplate(currentWorkItem, witType, targetTeamSettings, teamAreaPath, newWorkItemInfo);
             console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
             witClient
-                .createWorkItem(newWorkItem, targetTeam.project, witType.referenceName)
+                .createWorkItem(newWorkItem, targetTeam.project, witType.name)
                 .then(function (response) {
                 console.log("Response : ", response);
                 if (service != null) {

@@ -123,7 +123,7 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
                     .createWorkItem(
                       newWorkItem,
                       targetTeam.project,
-                      witType.referenceName
+                      witType.name
                     )
                     .then(function(response) {
                       console.log("Response : ", response);
