@@ -6,6 +6,19 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     function WriteLog(msg) {
         console.log('Create-Child-Links: ' + msg);
     }
+    function ShowErrorMessage(message, title) {
+        if (title === void 0) { title = "Une erreur est survenue"; }
+        VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
+            var dialogOptions = {
+                title: title,
+                width: 425,
+                height: 175,
+                useBowtieStyle: true,
+                buttons: [dialogService.buttons.ok]
+            };
+            dialogService.openMessageDialog(message, dialogOptions);
+        });
+    }
     function getWorkItemFormService() {
         return _WorkItemServices.WorkItemFormService.getService();
     }
@@ -88,7 +101,13 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                         });
                     });
                 }
+            }, function (reason) {
+                ShowErrorMessage("La demande de soutien DSD n'a pas pu être créé.");
+                console.log("Erreur de création de demande : ", reason);
             });
+        }, function (reason) {
+            ShowErrorMessage("Une erreur est survenue pour charger le type dans le projet d'équipe.");
+            console.log("Erreur de chargement de type : ", reason);
         });
     }
     function create(context, newWorkItemInfo) {
@@ -114,7 +133,13 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function (team) {
                 targetTeam.team = team.name;
                 targetTeam.teamId = team.id;
+            }, function (reason) {
+                ShowErrorMessage("L'équipe de projet n'a pas été trouvé.");
+                console.log("Erreur de chargement d'équipe : ", reason);
             });
+        }, function (reason) {
+            ShowErrorMessage("Le projet n'a pas été trouvé.");
+            console.log("Erreur de chargement de projet : ", reason);
         });
         workClient.getTeamSettings(team)
             .then(function (teamSettings) {
@@ -130,8 +155,14 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                             createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
                         });
                     });
+                }, function (reason) {
+                    ShowErrorMessage("Les configuration de l'équipe n'as pas été chargé.");
+                    console.log("Erreur de chargement de configuration d'équipe : ", reason);
                 });
             });
+        }, function (reason) {
+            ShowErrorMessage("Les configuration de l'équipe n'as pas été chargé.");
+            console.log("Erreur de chargement de configuration d'équipe : ", reason);
         });
     }
     exports.create = create;

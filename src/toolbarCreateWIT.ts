@@ -5,15 +5,14 @@ import * as _WorkItemServices from "TFS/WorkItemTracking/Services";
 import * as _WorkItemRestClient from "TFS/WorkItemTracking/RestClient";
 import * as workRestClient from "TFS/Work/RestClient";
 import * as coreRestClient from "TFS/Core/RestClient";
-// import { Dialog } from "VSS/Controls/Dialogs";
+import { Dialog, MessageDialog, MessageDialogButtons } from "VSS/Controls/Dialogs";
 // import * as Q from "Q";
 // import * as StatusIndicator from "VSS/Controls/StatusIndicator";
-import * as Dialogs from "VSS/Controls/Dialogs";
+//import * as Dialogs from "VSS/Controls/Dialogs";
 import { TemplateType, WorkItemType, WorkItem } from "TFS/WorkItemTracking/Contracts";
 import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
+import { buttonKeydownHandler } from "VSS/Utils/UI";
 // import * as Contracts from "VSS/WebApi/Contracts";
-
-
 
     var ctx = null;
 
@@ -21,6 +20,25 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
    
     function WriteLog(msg) {
         console.log('Create-Child-Links: ' + msg);
+    }
+
+    function ShowErrorMessage(message, title = "Une erreur est survenue"){
+      // alert(message);
+
+      VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService : IHostDialogService) {
+        // var extensionCtx = VSS.getExtensionContext();
+
+        // Show dialog
+        var dialogOptions : IOpenMessageDialogOptions = {
+            title: title,
+            width: 425,
+            height: 175,
+            useBowtieStyle: true, 
+            buttons:  [dialogService.buttons.ok]
+        };
+
+        dialogService.openMessageDialog(message, dialogOptions);
+      })
     }
 
     function getWorkItemFormService() {
@@ -126,7 +144,7 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
                       witType.name
                     )
                     .then(function(response) {
-                      console.log("Response : ", response);
+                      //console.log("Response : ", response);
             
                       //Add relation
                       if (service != null) {
@@ -175,12 +193,14 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
                             });
                           });
                       }
+                    }, function(reason) {
+                      ShowErrorMessage("La demande de soutien DSD n'a pas pu être créé.")
+                      console.log("Erreur de création de demande : ", reason);
                     });
+              }, function(reason) {
+                ShowErrorMessage("Une erreur est survenue pour charger le type dans le projet d'équipe.")
+                console.log("Erreur de chargement de type : ", reason);
               });
-
-      
-
-
     }
 
     export function create(context, newWorkItemInfo) {
@@ -211,8 +231,14 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
           coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function(team){
             targetTeam.team = team.name;
             targetTeam.teamId = team.id;
+          }, function(reason) {
+            ShowErrorMessage("L'équipe de projet n'a pas été trouvé.")
+            console.log("Erreur de chargement d'équipe : ", reason);
           });
 
+        }, function(reason) {
+          ShowErrorMessage("Le projet n'a pas été trouvé.")
+          console.log("Erreur de chargement de projet : ", reason);
         });
 
         workClient.getTeamSettings(team)
@@ -229,15 +255,18 @@ import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
   
                               currentWorkItem['System.Id'] = context.workItemId;
   
-                              //console.log("currentWorkItem" , currentWorkItem);
-  
                               getWorkItemFormService().then(function (service) {
                                 createWorkItem(service, currentWorkItem,  teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
                               });
   
                           })
+                    }, function(reason) {
+                      ShowErrorMessage("Les configuration de l'équipe n'as pas été chargé.")
+                      console.log("Erreur de chargement de configuration d'équipe : ", reason);    
                     });
                   });
+                }, function(reason) {
+                  ShowErrorMessage("Les configuration de l'équipe n'as pas été chargé.")
+                  console.log("Erreur de chargement de configuration d'équipe : ", reason);
                 })
-
       }
