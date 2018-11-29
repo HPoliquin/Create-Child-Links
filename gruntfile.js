@@ -1,18 +1,18 @@
 ﻿module.exports = function (grunt) {
     grunt.initConfig({
         exec: {
-            mjq_dev: {
-                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_dev.json --output-path dist" ,
-                stdout: true,
-                stderr: true
-            },
             package_dev: {
                 command: "tfx extension create --rev-version --manifests vss-extension.json --overrides-file static/configs/dev.json --output-path dist" ,
                 stdout: true,
                 stderr: true
             },
+            mjq_dev: {
+                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_dev.json --output-path dist" ,
+                stdout: true,
+                stderr: true
+            },
             package_release: {
-                command: "tfx extension create  --manifests vss-extension.json --overrides-file static/configs/release.json --output-path dist",
+                command: "tfx extension create --rev-version  --manifests vss-extension.json --overrides-file static/configs/release.json --output-path dist",
                 stdout: true,
                 stderr: true
             },
