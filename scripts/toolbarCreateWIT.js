@@ -62,7 +62,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             witClient
                 .createWorkItem(newWorkItem, targetTeam.project, witType.name)
                 .then(function (response) {
-                console.log("Response : ", response);
                 if (service != null) {
                     service.addWorkItemRelations([
                         {
