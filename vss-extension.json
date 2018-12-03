@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.280",
+    "version": "0.1.283",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
