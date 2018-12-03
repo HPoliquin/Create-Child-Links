@@ -4,7 +4,7 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     var ctx = null;
     var targetProjectName = "DSD";
     function WriteLog(msg) {
-        console.log('Create-Child-Links: ' + msg);
+        console.log("Create-Child-Links: " + msg);
     }
     function ShowErrorMessage(message, title) {
         if (title === void 0) { title = "Une erreur est survenue"; }
@@ -19,95 +19,203 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             dialogService.openMessageDialog(message, dialogOptions);
         });
     }
+    function OpenCreateWITDialog(witType, newWorkItemURI) {
+        var createURI = ctx.host.uri +
+            targetProjectName +
+            "/_workItemns/create/" +
+            encodeURIComponent(witType.name) +
+            "?" +
+            newWorkItemURI;
+        VSS.getService(VSS.ServiceIds.Navigation).then(function (navSvc) {
+            navSvc.openNewWindow(createURI, "");
+        });
+    }
+    function OpenWITDialog(title, postContent) {
+        console.log("Opening dialog of", postContent);
+        VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
+            var extensionCtx = VSS.getExtensionContext();
+            var contibution = VSS.getContribution();
+            var dialogOptions = {
+                title: title || "Properties",
+                width: 900,
+                height: 700,
+                buttons: [dialogService.buttons.ok, dialogService.buttons.cancel]
+            };
+            var contributionConfig = {
+                url: "https://dev.azure.com/Cofomo-HPoliquin/DSD/_workItems/create/User%20Story"
+            };
+            dialogService.openDialog("ms.vss-work-web.work-item-form", dialogOptions, contributionConfig, postContent);
+        });
+    }
     function getWorkItemFormService() {
+        console.log("Contribution id :", _WorkItemServices.WorkItemFormService.contributionId);
         return _WorkItemServices.WorkItemFormService.getService();
     }
     function IsPropertyValid(taskTemplate, key) {
         if (taskTemplate.fields.hasOwnProperty(key) == false) {
             return false;
         }
-        if (key.indexOf('System.Tags') >= 0) {
+        if (key.indexOf("System.Tags") >= 0) {
             return false;
         }
         return true;
     }
-    function createWorkItemFromTemplate(currentWorkItem, taskTemplate, teamSettings, teamAreaPath, newWorkItemInfo) {
+    function createWorkItemFromTemplate(currentWorkItem, currentWorkItemFields, taskTemplate, teamSettings, teamAreaPath, newWorkItemInfo) {
         var workItem = [];
-        workItem.push({ "op": "add", "path": "/fields/System.Title", "value": newWorkItemInfo['System.Title'] });
-        workItem.push({ "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] });
+        workItem.push({
+            op: "add",
+            path: "/fields/System.Title",
+            value: newWorkItemInfo["System.Title"]
+        });
+        workItem.push({
+            op: "add",
+            path: "/fields/System.History",
+            value: newWorkItemInfo["System.Comment"]
+        });
         {
-            workItem.push({ "op": "add", "path": "/fields/System.AreaPath", "value": teamAreaPath });
+            workItem.push({
+                op: "add",
+                path: "/fields/System.AreaPath",
+                value: teamAreaPath
+            });
         }
-        workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name + teamSettings.defaultIteration.path });
-        if (taskTemplate != undefined && taskTemplate.fieldInstances.find(function (f) { return f.referenceName == "Custom.Application"; }) != undefined) {
+        workItem.push({
+            op: "add",
+            path: "/fields/System.IterationPath",
+            value: teamSettings.backlogIteration.name + teamSettings.defaultIteration.path
+        });
+        if (taskTemplate != undefined &&
+            taskTemplate.fieldInstances.find(function (f) {
+                return f.referenceName == "Custom.Application";
+            }) != undefined) {
             if (currentWorkItem["Custom.Application"] != undefined) {
-                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": currentWorkItem["Custom.Application"] });
+                workItem.push({
+                    op: "add",
+                    path: "/fields/Custom.Application",
+                    value: currentWorkItem["Custom.Application"]
+                });
             }
             else {
-                workItem.push({ "op": "add", "path": "/fields/Custom.Application", "value": ctx.project.name });
+                workItem.push({
+                    op: "add",
+                    path: "/fields/Custom.Application",
+                    value: ctx.project.name
+                });
             }
         }
         else {
-            workItem.push({ "op": "add", "path": "/fields/System.Description", "value": ctx.project.name });
+            workItem.push({
+                op: "add",
+                path: "/fields/System.Description",
+                value: ctx.project.name
+            });
         }
+        workItem.push({
+            op: "add",
+            path: "/relations/-",
+            value: {
+                rel: newWorkItemInfo.linkType,
+                url: currentWorkItem.url,
+                attributes: {
+                    isLocked: false
+                }
+            }
+        });
         return workItem;
     }
-    function createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo) {
+    function createWorkItem(service, currentWorkItem, currentWorkItemFields, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
-        witClient
-            .getWorkItemType(targetTeam.project, newWorkItemInfo.witType)
-            .then(function (witType) {
-            var newWorkItem = createWorkItemFromTemplate(currentWorkItem, witType, targetTeamSettings, teamAreaPath, newWorkItemInfo);
-            console.log("WIT to create :", newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
-            witClient
-                .createWorkItem(newWorkItem, targetTeam.project, witType.name)
-                .then(function (response) {
-                if (service != null) {
-                    service.addWorkItemRelations([
-                        {
-                            rel: newWorkItemInfo.linkType,
-                            url: response.url
-                        }
-                    ]);
-                    service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
-                    service.beginSaveWorkItem(function (response) {
-                        WriteLog(" Saved");
-                    }, function (error) {
-                        WriteLog(" Error saving: " + response);
-                    });
+        witClient.getWorkItemType(targetTeam.project, newWorkItemInfo.witType).then(function (witType) {
+            var newWorkItem = createWorkItemFromTemplate(currentWorkItem, currentWorkItemFields, witType, targetTeamSettings, teamAreaPath, newWorkItemInfo);
+            console.log("WIT to create :", witType, newWorkItem, targetTeam, targetTeamSettings, newWorkItemInfo);
+            var newCTX = VSS.getWebContext();
+            newCTX.project.id = targetTeam.projectId;
+            newCTX.project.name = targetTeam.project;
+            newCTX.team.id = targetTeam.teamId;
+            newCTX.team.name = targetTeam.team;
+            _WorkItemServices.WorkItemFormNavigationService.getService(newCTX).then(function (workItemNavSvc) {
+                var newWITParams = {
+                    "System.Title": newWorkItemInfo["System.Title"],
+                    "System.AreaPath": teamAreaPath,
+                    "System.History": newWorkItemInfo["System.Comment"],
+                    "System.IterationPath": targetTeamSettings.backlogIteration.name +
+                        targetTeamSettings.defaultIteration.path
+                };
+                if (witType != undefined &&
+                    witType.fieldInstances.find(function (f) {
+                        return f.referenceName == "Custom.Application";
+                    }) != undefined) {
+                    if (currentWorkItem["Custom.Application"] != undefined) {
+                        newWITParams["Custom.Application"] =
+                            currentWorkItem["Custom.Application"];
+                    }
+                    else {
+                        newWITParams["Custom.Application"] = ctx.project.name;
+                    }
                 }
                 else {
-                    var workItemId = currentWorkItem["System.Id"];
-                    var document = [
-                        {
-                            op: "add",
-                            path: "/relations/-",
-                            value: {
-                                rel: newWorkItemInfo.linkType,
-                                url: response.url,
-                                attributes: {
-                                    isLocked: false
-                                }
-                            }
-                        },
-                        { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
-                    ];
-                    witClient
-                        .updateWorkItem(document, workItemId)
-                        .then(function (response) {
-                        var a = response;
-                        VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
-                        });
-                    });
+                    newWITParams["System.Description"] = ctx.project.name;
                 }
-            }, function (reason) {
-                ShowErrorMessage("La demande de soutien DSD n'a pas pu être créé.");
-                console.log("Erreur de création de demande : ", reason);
+                workItemNavSvc
+                    .openNewWorkItem(witType.name, newWITParams)
+                    .then(function (newWIT) {
+                    if (newWIT != null) {
+                        AddRelationToCurrentWorkItem(newWIT, service, newWorkItemInfo, witClient, currentWorkItem);
+                    }
+                });
             });
         }, function (reason) {
             ShowErrorMessage("Une erreur est survenue pour charger le type dans le projet d'équipe.");
             console.log("Erreur de chargement de type : ", reason);
         });
+    }
+    function AddRelationToCurrentWorkItem(newWIT, service, newWorkItemInfo, witClient, currentWorkItem) {
+        console.log("created work item :", newWIT);
+        if (service != null) {
+            service.addWorkItemRelations([
+                {
+                    rel: newWorkItemInfo.linkType,
+                    url: newWIT.url,
+                    attributes: {
+                        isLocked: false
+                    }
+                }
+            ]);
+            service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
+            service.save().then(function (response) {
+                WriteLog(" Saved");
+            }, function (error) {
+                WriteLog(" Error saving: " + newWIT);
+            });
+        }
+        else {
+            var jsondoc = [
+                {
+                    op: "add",
+                    path: "/relations/-",
+                    value: {
+                        rel: newWorkItemInfo.linkType,
+                        url: newWIT.url,
+                        attributes: {
+                            isLocked: false
+                        }
+                    }
+                },
+                {
+                    op: "add",
+                    path: "/fields/System.History",
+                    value: newWorkItemInfo["System.Comment"]
+                }
+            ];
+            witClient
+                .updateWorkItem(jsondoc, currentWorkItem.id)
+                .then(function (response) {
+                var a = response;
+                VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
+                    navigationService.reload();
+                });
+            });
+        }
     }
     function create(context, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
@@ -129,9 +237,9 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
         coreClient.getProject(targetTeam.project).then(function (project) {
             targetTeam.project = project.name;
             targetTeam.projectId = project.id;
-            coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function (team) {
-                targetTeam.team = team.name;
-                targetTeam.teamId = team.id;
+            coreClient.getTeam(project.id, newWorkItemInfo.TeamId).then(function (myTeam) {
+                targetTeam.team = myTeam.name;
+                targetTeam.teamId = myTeam.id;
             }, function (reason) {
                 ShowErrorMessage("L'équipe de projet n'a pas été trouvé.");
                 console.log("Erreur de chargement d'équipe : ", reason);
@@ -140,18 +248,21 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             ShowErrorMessage("Le projet n'a pas été trouvé.");
             console.log("Erreur de chargement de projet : ", reason);
         });
-        workClient.getTeamSettings(team)
-            .then(function (teamSettings) {
-            workClient.getTeamFieldValues(targetTeam).then(function (teamFields) {
+        workClient.getTeamSettings(team).then(function (teamSettings) {
+            workClient
+                .getTeamFieldValues(targetTeam)
+                .then(function (teamFields) {
                 return teamFields.defaultValue;
-            }).then(function (teamAreaPath) {
+            })
+                .then(function (teamAreaPath) {
                 workClient.getTeamSettings(targetTeam).then(function (targetTeamSettings) {
-                    witClient.getWorkItem(context.workItemId)
-                        .then(function (value) {
-                        var currentWorkItem = value.fields;
-                        currentWorkItem['System.Id'] = context.workItemId;
+                    witClient
+                        .getWorkItem(context.workItemId)
+                        .then(function (currentWorkItem) {
+                        var currentWorkItemFields = currentWorkItem.fields;
+                        currentWorkItemFields["System.Id"] = context.workItemId;
                         getWorkItemFormService().then(function (service) {
-                            createWorkItem(service, currentWorkItem, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
+                            createWorkItem(service, currentWorkItem, currentWorkItemFields, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
                         });
                     });
                 }, function (reason) {
