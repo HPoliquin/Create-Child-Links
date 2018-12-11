@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.283",
+    "version": "0.1.296",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -11,14 +11,24 @@
             "id": "Microsoft.VisualStudio.Services"
         }
     ],
+    "demands": [
+        "api-version/3.0"
+    ],
     "icons": {
         "default": "static/img/one-click.png"
     },
     "scopes": [
         "vso.work", 
-        "vso.work_write", 
-        "vso.project"
+        "vso.work_write",
+        "vso.work_full",
+        "vso.project",
+        "vso.serviceendpoint"
     ],
+    "content": {
+        "details":{
+            "path": "readme.md"
+        }
+    },
     "contributions": [
         {
             "id": "create-child-links-work-item-button",
@@ -69,8 +79,7 @@
             "path": "node_modules/vss-web-extension-sdk/lib",
             "addressable": true,
             "packagePath": "lib"
-        }
-        ,
+        },
         {
             "path": "node_modules/bluebird/js/release",
             "addressable": true,
