@@ -113,7 +113,6 @@
                   .getWorkItemTypeCategories(project.id)
                   .then(function(witCategories) {
                       var category = witCategories.find(category => category.referenceName == "Microsoft.RequirementCategory");
-                      console.log("Category found :", category);
                       let witTypeAdded = 0;
                       if(category!=undefined || category.workItemTypes.length == 0)
                       {
@@ -125,26 +124,12 @@
                                     text: wit.name
                                   })
                                 );
-                          // client
-                          // .getWorkItemType(project.name, wit.name)
-                          // .then(function(witType) {
-                          //     if(witType.isDisabled === false) {
-                          //       witTypeAdded++;
-                          //       $("select.linkdialog-wittype-select").append(
-                          //         $("<option>", {
-                          //           value: witType.referenceName,
-                          //           text: witType.name
-                          //         })
-                          //       );
-                          //     }
-                          // });
                         });
                       } 
                       if(witTypeAdded == 0) {
                         client
                         .getWorkItemTypes(project.id)
                         .then(function(witTypes) {
-                          console.log("witTypes : ", witTypes);
                           witTypes.forEach(element => {
                             if(element.isDisabled === false) {
                               $("select.linkdialog-wittype-select").append(
@@ -217,60 +202,7 @@
 
   <div class="widget-configuration">
     <div class="content">
-        <div class="current-work-item"></div>
-      <!--
-          <div class="bowtie-style">
-              <p class="link-dialog-description">Vous ajoutez un lien à partir de&nbsp;:</p>
-          </div>
-          <div class="title">
-              <div>
-                  <div>
-                      <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
-                      <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
-                          <div>
-
-                              <div class="la-main-component">
-                                  <div class="la-list">
-                                      <div class="la-list-group-noheader">
-                                          <div class="la-item">
-                                              <div class="la-item-wrapper">
-                                                  <div class="la-artifact-data">
-                                                      <div class="la-primary-data">
-                                                          <div class="la-primary-icon">
-                                                              <div class="ms-TooltipHost"><span class="bowtie-icon bowtie-symbol-bug"
-                                                                      style="color: rgb(204, 41, 61);"></span></div>
-                                                          </div>
-                                                          <div class="la-user-icon"></div>
-                                                          <div class="la-primary-data-id"></div>
-                                                          <div class="la-primary-data-title"></div>
-                                                      </div>
-                                                      <div class="la-additional-data">
-                                                          <div class="la-additional-data-item">
-                                                              <div class="ms-TooltipHost"><span class="la-text la-primary-data-modified"></span></div>
-                                                          </div>
-                                                          <span>, &nbsp; </span>
-                                                          <div class="la-additional-data-item">
-                                                              <div class="ms-TooltipHost">
-                                                                  <div class="ms-TooltipHost"><span class="la-color-circle"
-                                                                          style="background-color: transparent; border-color: transparent;"></span></div><span
-                                                                      class="la-text la-primary-data-state"></span>
-                                                              </div>
-                                                          </div>
-                                                      </div>
-                                                  </div>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-
-          </div>
-        -->
+      <div class="current-work-item"></div>
 
       <div class="link-dialog-form-container bowtie">
         <div class="dialog modal-dialog link-dialog" style="width: 100%;">
@@ -300,26 +232,6 @@
           <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text" id="dialog-label" />
           <div id="description" class="message"></div>
 
-          <!--
-              <div>
-                  <div data-reactroot="" class="ltv-container">
-                      <table class="ltv-table-only-image">
-                          <tbody>
-                              <tr>
-                                  <td>
-                                      <div class="ms-TooltipHost host_02de3147">
-                                          <img src="/tfs/_static/tfs/Dev16.M122.7/_content/Work%2Fltv-network.png" id="img-network-nonDirectional"
-                                              alt="Il s'agit d'un lien non directionnel qui peut être créé entre des ensembles d'éléments de travail"
-                                              class="ltv-image" tabindex="0">
-                                      </div>
-                                  </td>
-                              </tr>
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
-            -->
-
           <div class="multi-line-text-input">
             <label for="comment">Commentaires</label>
             <textarea id="comment" maxlength="255" style="height: 150px;"></textarea>
@@ -329,66 +241,7 @@
     </div>
   </div>
 
-  <!--
-      <div class="widget-configuration">
-      <div class="description">Select a board column and swimlane to move your work item.</p>
-          <div>
-              <div data-reactroot="">
-                  <div class="bowtie-icon bowtie-map-pin-fill lswiv-you-are-here-icon"></div>
-                  <div class="lswiv-wi-container ltv-wi-artifacts-container-overflow">
-                      <div>
-                          <div class="la-main-component">
-                              <div class="la-list">
-                                  <div class="la-list-group-noheader">
-                                      <div class="la-item">
-                                          <div class="la-item-wrapper">
-                                              <div class="la-artifact-data">
-                                                  <div class="la-primary-data">
-                                                      <div class="la-primary-icon">
-                                                          <div class="ms-TooltipHost host_02de3147"><span class="bowtie-icon bowtie-symbol-book"
-                                                                  style="color: rgb(255, 20, 147);"></span></div>
-                                                      </div>
-                                                      <div class="ms-TooltipHost host_02de3147">
-                                                          <div class="la-user-icon">
-                                                              {{"System.Title"}}
-                                                              <img alt="Henrick Poliquin <MJQ\POLH01>" src="/tfs/MJQ/_api/_common/IdentityImage?id=&amp;identifier=MJQ%5CPOLH01&amp;resolveAmbiguous=false&amp;identifierType=0&amp;size=0&amp;__v=5">
-                                                          </div>
-                                                      </div>
-                                                      <div class="la-primary-data-id">
-                                                          9911
 
-                                                          &nbsp;
-                                                      </div>
-                                                      <div class="ms-TooltipHost host_02de3147"><a href="/tfs/MJQ/Entretien-Evolution/_workitems/edit/9911">15-Corrections
-                                                              d'encaissement qui ne sont pas présentées au M022L053</a></div>
-                                                  </div>
-                                                  <div class="la-additional-data">
-                                                      <div class="la-additional-data-item">
-                                                          <div class="ms-TooltipHost host_02de3147"><span class="la-text">Mise
-                                                                  à jour de 01/11/2018</span></div>
-                                                      </div><span>, &nbsp; </span>
-                                                      <div class="la-additional-data-item">
-                                                          <div class="ms-TooltipHost host_02de3147">
-                                                              <div class="ms-TooltipHost host_02de3147"><span class="la-color-circle"
-                                                                      style="background-color: transparent; border-color: transparent;"></span></div><span
-                                                                  class="la-text">Fermé</span>
-                                                          </div>
-                                                      </div>
-                                                  </div>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-
-      </div>
-    -->
 </body>
 
 </html>

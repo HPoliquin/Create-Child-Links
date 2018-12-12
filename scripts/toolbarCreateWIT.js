@@ -1,4 +1,4 @@
-define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "TFS/WorkItemTracking/RestClient", "TFS/Work/RestClient", "TFS/Core/RestClient"], function (require, exports, _VSSServices, _WorkItemServices, _WorkItemRestClient, workRestClient, coreRestClient) {
+define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTracking/RestClient", "TFS/Work/RestClient", "TFS/Core/RestClient"], function (require, exports, _WorkItemServices, _WorkItemRestClient, workRestClient, coreRestClient) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ctx = null;
@@ -25,18 +25,14 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
     function createWorkItem(service, currentWorkItem, currentWorkItemFields, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
         witClient.getWorkItemType(targetTeam.project, newWorkItemInfo.witType).then(function (witType) {
-            console.log("WIT to create :", witType, targetTeam, targetTeamSettings, newWorkItemInfo);
             var newCTX = VSS.getWebContext();
             newCTX.project.id = targetTeam.projectId;
             newCTX.project.name = targetTeam.project;
             newCTX.team.id = targetTeam.teamId;
             newCTX.team.name = targetTeam.team;
-            var targetVSS = _VSSServices.getService(_VSSServices.VssService, newCTX);
             VSS.getService(_WorkItemServices.WorkItemFormNavigationService.contributionId, newCTX).then(function (workItemNavSvc) {
                 var newWITParams = createNewWITParam(witType);
-                workItemNavSvc
-                    .openNewWorkItem(witType.name, newWITParams)
-                    .then(function (newWIT) {
+                workItemNavSvc.openNewWorkItem(witType.name, newWITParams).then(function (newWIT) {
                     if (newWIT != null) {
                         AddRelationToCurrentWorkItem(newWIT, service, newWorkItemInfo, witClient, currentWorkItem);
                     }
@@ -118,7 +114,6 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
             witClient
                 .createWorkItem(newWorkItem, targetTeam.project, witType.name)
                 .then(function (response) {
-                console.log("Response : ", response);
                 if (service != null) {
                     service.addWorkItemRelations([
                         {
@@ -129,7 +124,7 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
                             }
                         }
                     ]);
-                    service.setFieldValue("System.History", newWorkItemInfo['System.Comment']);
+                    service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
                 }
                 else {
                     var workItemId = currentWorkItemFields["System.Id"];
@@ -145,7 +140,11 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
                                 }
                             }
                         },
-                        { "op": "add", "path": "/fields/System.History", "value": newWorkItemInfo['System.Comment'] }
+                        {
+                            op: "add",
+                            path: "/fields/System.History",
+                            value: newWorkItemInfo["System.Comment"]
+                        }
                     ];
                     witClient
                         .updateWorkItem(document, workItemId)
@@ -159,7 +158,8 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
                 }
             }, function (reason) {
                 console.log("Impossible de créer la demande de soutien :", reason);
-            }).then(function (response) {
+            })
+                .then(function (response) {
                 _WorkItemServices.WorkItemFormNavigationService.getService().then(function (workItemNavSvc) {
                     workItemNavSvc.openWorkItem(myWIT.id, true);
                 });
@@ -167,12 +167,12 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
             return myWIT;
         }
         function createNewWITParam(witType) {
-            console.log("Creating new WIT Params of type", witType);
             var newWITParams = {
                 "System.Title": newWorkItemInfo["System.Title"],
                 "System.AreaPath": teamAreaPath,
                 "System.History": newWorkItemInfo["System.Comment"],
-                "System.IterationPath": targetTeamSettings.backlogIteration.name + targetTeamSettings.defaultIteration.path,
+                "System.IterationPath": targetTeamSettings.backlogIteration.name +
+                    targetTeamSettings.defaultIteration.path,
                 "System.TeamProject": targetTeam.project
             };
             if (witType != undefined &&
@@ -190,12 +190,10 @@ define(["require", "exports", "VSS/Service", "TFS/WorkItemTracking/Services", "T
             else {
                 newWITParams["System.Description"] = ctx.project.name;
             }
-            console.log("New WIT Params", newWITParams);
             return newWITParams;
         }
     }
     function AddRelationToCurrentWorkItem(newWIT, service, newWorkItemInfo, witClient, currentWorkItem) {
-        console.log("Created work item, adding relation to :", newWIT);
         if (service != null) {
             service.addWorkItemRelations([
                 {

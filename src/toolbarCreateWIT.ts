@@ -87,32 +87,19 @@ function createWorkItem(
 
   witClient.getWorkItemType(targetTeam.project, newWorkItemInfo.witType).then(
     function(witType: WorkItemType) {
-      // var newWorkItem = createWorkItemFromTemplate(
-      //   currentWorkItem,
-      //   currentWorkItemFields,
+      // console.log(
+      //   "WIT to create :",
       //   witType,
+      //   targetTeam,
       //   targetTeamSettings,
-      //   teamAreaPath,
       //   newWorkItemInfo
       // );
-
-      console.log(
-        "WIT to create :",
-        witType,
-        targetTeam,
-        targetTeamSettings,
-        newWorkItemInfo
-      );
 
       var newCTX: WebContext = VSS.getWebContext();
       newCTX.project.id = targetTeam.projectId;
       newCTX.project.name = targetTeam.project;
       newCTX.team.id = targetTeam.teamId;
       newCTX.team.name = targetTeam.team;
-
-      var targetVSS = _VSSServices.getService(_VSSServices.VssService, newCTX);
-
-      //_WorkItemServices.WorkItemFormNavigationService.getService(newCTX).then(
 
       VSS.getService(
         _WorkItemServices.WorkItemFormNavigationService.contributionId,
@@ -282,8 +269,6 @@ function createWorkItem(
       .createWorkItem(newWorkItem, targetTeam.project, witType.name)
       .then(
         function(response: WorkItem) {
-          console.log("Response : ", response);
-
           //Add relation
           if (service != null) {
             service.addWorkItemRelations([
@@ -358,7 +343,6 @@ function createWorkItem(
   }
 
   function createNewWITParam(witType: WorkItemType) {
-    console.log("Creating new WIT Params of type", witType);
     var newWITParams = {
       "System.Title": newWorkItemInfo["System.Title"],
       "System.AreaPath": teamAreaPath,
@@ -384,7 +368,6 @@ function createWorkItem(
     } else {
       newWITParams["System.Description"] = ctx.project.name;
     }
-    console.log("New WIT Params", newWITParams);
     return newWITParams;
   }
 }
@@ -396,7 +379,6 @@ function AddRelationToCurrentWorkItem(
   witClient: _WorkItemRestClient.WorkItemTrackingHttpClient4_1,
   currentWorkItem: any
 ) {
-  console.log("Created work item, adding relation to :", newWIT);
   //Add relation
   if (service != null) {
     service.addWorkItemRelations([

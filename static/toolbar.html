@@ -34,9 +34,6 @@
                         // The actionContext parameter contains context data surrounding the circumstances of this
                         // action getting invoked.
                         execute: function (actionContext) {
-
-                            console.log("Create Child Links Clicked!");
-
                             let dialogReturn;
                             VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
                                 var extensionCtx = VSS.getExtensionContext();
@@ -57,7 +54,6 @@
                                     },
                                     okCallback: function (result) {
                                         // Log the result to the console
-                                        console.log(JSON.stringify(result));
                                         toolbarCreateWIT.create(actionContext, result);
                                     }
                                 };
@@ -96,17 +92,11 @@
                     };
                 });
 
-                // Associate the menuContributionHandler object with the "myAction" menu contribution from the manifest.
-                //VSS.register(VSS.getContribution().id, menuContributionHandler);
-
                 VSS.register("create-child-links-work-item-button", menuContributionHandler);
 
                 VSS.notifyLoadSucceeded();
             }
         );
-        // VSS.ready(function () {
-        //     VSS.notifyLoadSucceeded();
-        // });
     </script>
 </head>
 
