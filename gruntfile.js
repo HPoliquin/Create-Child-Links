@@ -1,18 +1,23 @@
 ﻿module.exports = function (grunt) {
     grunt.initConfig({
         exec: {
-            mjq_dev: {
-                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_dev.json --output-path dist" ,
-                stdout: true,
-                stderr: true
-            },
             package_dev: {
                 command: "tfx extension create --rev-version --manifests vss-extension.json --overrides-file static/configs/dev.json --output-path dist" ,
                 stdout: true,
                 stderr: true
             },
+            mjq_dev: {
+                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_dev.json --output-path dist" ,
+                stdout: true,
+                stderr: true
+            },
             package_release: {
-                command: "tfx extension create  --manifests vss-extension.json --overrides-file static/configs/release.json --output-path dist",
+                command: "tfx extension create --rev-version  --manifests vss-extension.json --overrides-file static/configs/release.json --output-path dist",
+                stdout: true,
+                stderr: true
+            },
+            mjq_release: {
+                command: "tfx extension create --manifests vss-extension.json --overrides-file static/configs/mjq_release.json --output-path dist" ,
                 stdout: true,
                 stderr: true
             },
@@ -62,6 +67,7 @@
     grunt.registerTask("mjq-dev", ["copy", "ts", "exec:package_dev", "exec:mjq_dev"]);
     grunt.registerTask("package-dev", ["copy", "ts", "exec:package_dev"]);
     grunt.registerTask("package-release", ["copy", "exec:package_release"]);
+    grunt.registerTask("mjq-release", ["copy", "ts", "exec:package_release", "exec:mjq_release"]);
     grunt.registerTask("publish-dev", ["package-dev", "exec:publish_dev"]);        
     grunt.registerTask("publish-release", ["package-release", "exec:publish_release"]);        
     

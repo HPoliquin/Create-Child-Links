@@ -1,0 +1,3 @@
+registry=http://registry.npmjs.org/
+proxy="http://MJQ%5C#{LoginUsagerNPM}#:#{PasswordUsagerNPM}#@mtlproxy.justice:8080/"
+https-proxy="http://MJQ%5C#{LoginUsagerNPM}#:#{PasswordUsagerNPM}#@mtlproxy.justice:8080/"

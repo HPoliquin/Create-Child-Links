@@ -1,10 +1,10 @@
 {
-    "id": "vsts-suivis-dsd-dev",
+    "id": "vsts-suivis-dsd",
     "name": "Creer suivis DSD",
     "publisher": "MJQ",
     "description": "Créer une demande de soutien DSD",
     "categories": [
         "Plan and track"
     ],
-    "public": false
+    "public": true
 }

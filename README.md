@@ -37,10 +37,12 @@ To test compilation, you can run `grunt`. You should receive no errors.
 
 ```
 grunt publish-dev
+grunt mjq-dev
 ```
 
 OR
 
 ```
 grunt publish-release
+grunt mjq-release
 ```
