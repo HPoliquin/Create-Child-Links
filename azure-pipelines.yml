@@ -18,5 +18,8 @@ steps:
 - script: |
     npm install
     # npm run build
+    npm install -g grunt
+    npm install -g grunt-cli
+    npm install -g tfx-cli
     grunt package-dev
   displayName: 'npm install and build'
