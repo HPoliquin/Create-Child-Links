@@ -17,5 +17,6 @@ steps:
 
 - script: |
     npm install
-    npm run build
+    # npm run build
+    Grunt package-dev
   displayName: 'npm install and build'
