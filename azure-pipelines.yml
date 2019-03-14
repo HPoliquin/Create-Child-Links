@@ -21,7 +21,7 @@ steps:
     npm install -g grunt
     npm install -g grunt-cli
     npm install -g tfx-cli
-    # grunt package-dev
+    grunt package-dev
   displayName: 'npm install dependency'
 
 #Your build pipeline references an undefined variable named ‘Extension.Version’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
