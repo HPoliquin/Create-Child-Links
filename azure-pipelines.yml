@@ -24,6 +24,12 @@ steps:
     grunt package-dev
   displayName: 'npm install dependency'
 
+- task: Grunt@0
+  inputs:
+    gruntFile: 'gruntfile.js' 
+    targets: package-dev
+    # arguments: # Optional
+
 # #Your build pipeline references an undefined variable named ‘Extension.Version’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 # - task: ms-devlabs.vsts-developer-tools-build-tasks.publish-extension-build-task.PublishExtension@1
 #   displayName: 'Publish Extension'
