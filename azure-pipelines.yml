@@ -30,6 +30,11 @@ steps:
     targets: package-dev
     # arguments: # Optional
 
+- task: Grunt@1
+  inputs:
+    gruntFile: 'gruntfile.js' 
+    targets: publish-dev
+
 # # #Your build pipeline references an undefined variable named ‘Extension.Version’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 # - task: ms-devlabs.vsts-developer-tools-build-tasks.publish-extension-build-task.PublishExtension@1
 #   displayName: 'Publish Extension'
