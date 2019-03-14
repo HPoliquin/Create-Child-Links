@@ -24,14 +24,14 @@ steps:
     grunt package-dev
   displayName: 'npm install dependency'
 
-#Your build pipeline references an undefined variable named ‘Extension.Version’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
-- task: ms-devlabs.vsts-developer-tools-build-tasks.publish-extension-build-task.PublishExtension@1
-  displayName: 'Publish Extension'
-  inputs:
-    connectedServiceName: 'cofomo-henrickpoliquin'
-    fileType: vsix
-    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.Version).vsix'
-    extensionName: 'Create Child links'
-    updateTasksVersion: false
-    extensionVisibility: private
-    extensionPricing: free
+# #Your build pipeline references an undefined variable named ‘Extension.Version’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+# - task: ms-devlabs.vsts-developer-tools-build-tasks.publish-extension-build-task.PublishExtension@1
+#   displayName: 'Publish Extension'
+#   inputs:
+#     connectedServiceName: 'cofomo-henrickpoliquin'
+#     fileType: vsix
+#     vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.Version).vsix'
+#     extensionName: 'Create Child links'
+#     updateTasksVersion: false
+#     extensionVisibility: private
+#     extensionPricing: free
