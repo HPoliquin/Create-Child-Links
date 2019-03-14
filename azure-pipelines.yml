@@ -21,7 +21,7 @@ steps:
     npm install -g grunt
     npm install -g grunt-cli
     npm install -g tfx-cli
-    grunt package-dev
+    # grunt package-dev
   displayName: 'npm install dependency'
 
 - task: Grunt@0
