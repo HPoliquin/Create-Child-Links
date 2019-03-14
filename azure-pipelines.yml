@@ -30,7 +30,7 @@ steps:
     targets: package-dev
     # arguments: # Optional
 
-- task: Grunt@1
+- task: Grunt@0
   inputs:
     gruntFile: 'gruntfile.js' 
     targets: publish-dev
