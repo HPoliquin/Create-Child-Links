@@ -40,7 +40,7 @@ steps:
   inputs:
     connectedServiceName: 'cofomo-henrickpoliquin'
     fileType: vsix
-    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-0.1.4.vsix'
+    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-0.1.3.vsix'
     extensionName: 'Create Child links'
     updateTasksVersion: false
     extensionVisibility: private
