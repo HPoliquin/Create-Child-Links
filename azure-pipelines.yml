@@ -42,7 +42,7 @@ steps:
     fileType: vsix
     vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-*.vsix'
     extensionName: 'Create Child links'
-    updateTasksVersion: false
+    updateTasksVersion: true
     extensionVisibility: private
     extensionPricing: free
 
