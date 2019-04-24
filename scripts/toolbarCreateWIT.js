@@ -171,10 +171,13 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                 "System.Title": newWorkItemInfo["System.Title"],
                 "System.AreaPath": teamAreaPath,
                 "System.History": newWorkItemInfo["System.Comment"],
-                "System.IterationPath": targetTeamSettings.backlogIteration.name +
-                    targetTeamSettings.defaultIteration.path,
+                "System.IterationPath": targetTeamSettings.backlogIteration.name,
                 "System.TeamProject": targetTeam.project
             };
+            if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined) {
+                newWITParams["System.IterationPath"] = targetTeamSettings.backlogIteration.name +
+                    targetTeamSettings.defaultIteration.path;
+            }
             if (witType != undefined &&
                 witType.fieldInstances.find(function (f) {
                     return f.referenceName == "Custom.Application";
