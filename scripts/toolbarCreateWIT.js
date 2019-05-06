@@ -70,10 +70,14 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                 path: "/fields/System.IterationPath",
                 value: teamSettings.backlogIteration.name + teamSettings.defaultIteration.path
             });
-            if (taskTemplate != undefined &&
-                taskTemplate.fieldInstances.find(function (f) {
-                    return f.referenceName == "Custom.Application";
-                }) != undefined) {
+            var myCustomApplicationField = undefined;
+            for (var i = 0; i < taskTemplate.fieldInstances.length; i++) {
+                if (taskTemplate.fieldInstances[i].referenceName == "Custom.Application") {
+                    myCustomApplicationField = taskTemplate.fieldInstances[i];
+                    break;
+                }
+            }
+            if (taskTemplate != undefined && myCustomApplicationField != undefined) {
                 if (currentWorkItem["Custom.Application"] != undefined) {
                     workItem.push({
                         op: "add",
@@ -171,14 +175,21 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                 "System.Title": newWorkItemInfo["System.Title"],
                 "System.AreaPath": teamAreaPath,
                 "System.History": newWorkItemInfo["System.Comment"],
-                "System.IterationPath": targetTeamSettings.backlogIteration.name +
-                    targetTeamSettings.defaultIteration.path,
+                "System.IterationPath": targetTeamSettings.backlogIteration.name,
                 "System.TeamProject": targetTeam.project
             };
-            if (witType != undefined &&
-                witType.fieldInstances.find(function (f) {
-                    return f.referenceName == "Custom.Application";
-                }) != undefined) {
+            if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined) {
+                newWITParams["System.IterationPath"] = targetTeamSettings.backlogIteration.name +
+                    targetTeamSettings.defaultIteration.path;
+            }
+            var myCustomApplicationField = undefined;
+            for (var i = 0; i < witType.fieldInstances.length; i++) {
+                if (witType.fieldInstances[i].referenceName == "Custom.Application") {
+                    myCustomApplicationField = witType.fieldInstances[i];
+                    break;
+                }
+            }
+            if (witType != undefined && myCustomApplicationField != undefined) {
                 if (currentWorkItem["Custom.Application"] != undefined) {
                     newWITParams["Custom.Application"] =
                         currentWorkItem["Custom.Application"];
