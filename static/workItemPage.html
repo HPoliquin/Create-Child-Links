@@ -99,7 +99,7 @@
                                     .end()
                                     .append("<option>Choisir l'équipe</option>")
                                     .val('');
-                    teams.forEach(team => {
+                    teams.forEach(function(team) {
                       $("select.linkdialog-team-select").append(
                         $("<option>", {
                           value: team.id,
@@ -112,11 +112,19 @@
                   client
                   .getWorkItemTypeCategories(project.id)
                   .then(function(witCategories) {
-                      var category = witCategories.find(category => category.referenceName == "Microsoft.RequirementCategory");
+                      var category = undefined;
+                      for (let i=0; i< witCategories.length; i++) {
+                        if(witCategories[i].referenceName == "Microsoft.RequirementCategory") {
+                          category = witCategories[i];
+                          break;
+                        }
+                      }
+
+                      // var category = witCategories.find(function(category) { category.referenceName == "Microsoft.RequirementCategory"});
                       let witTypeAdded = 0;
                       if(category!=undefined || category.workItemTypes.length == 0)
                       {
-                        category.workItemTypes.forEach(wit => {
+                        category.workItemTypes.forEach(function(wit) {
                                 witTypeAdded++;
                                 $("select.linkdialog-wittype-select").append(
                                   $("<option>", {
@@ -130,7 +138,7 @@
                         client
                         .getWorkItemTypes(project.id)
                         .then(function(witTypes) {
-                          witTypes.forEach(element => {
+                          witTypes.forEach(function(element) {
                             if(element.isDisabled === false) {
                               $("select.linkdialog-wittype-select").append(
                                 $("<option>", {
@@ -150,7 +158,7 @@
                 });
 
                 client.getRelationTypes().then(function(relationsTypes) {
-                  relationsTypes.forEach(element => {
+                  relationsTypes.forEach(function(element) {
                     // Limit to Child link type
                     if(element.attributes.enabled === true 
                         && element.referenceName == "System.LinkTypes.Hierarchy-Forward") {

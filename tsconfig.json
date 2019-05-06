@@ -9,7 +9,8 @@
             "vss-web-extension-sdk"
         ],
         "lib": [
-            "es6",
+            "es5",
+            "ES2015.Collection",
             "dom",
             "es2015.iterable",
             "es2015.promise"

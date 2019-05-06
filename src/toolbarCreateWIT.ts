@@ -209,11 +209,19 @@ function createWorkItem(
     });
     //workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name })
 
+    var myCustomApplicationField = undefined;
+    for (let i=0; i< taskTemplate.fieldInstances.length; i++) {
+      if(taskTemplate.fieldInstances[i].referenceName == "Custom.Application") {
+        myCustomApplicationField = taskTemplate.fieldInstances[i];
+        break;
+      }
+    }
+
     if (
-      taskTemplate != undefined &&
-      taskTemplate.fieldInstances.find(f => {
-        return f.referenceName == "Custom.Application";
-      }) != undefined
+      taskTemplate != undefined && myCustomApplicationField != undefined
+      // taskTemplate.fieldInstances.find(f => {
+      //   return f.referenceName == "Custom.Application";
+      // }) != undefined
     ) {
       if (currentWorkItem["Custom.Application"] != undefined) {
         // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
@@ -358,11 +366,19 @@ function createWorkItem(
                                               targetTeamSettings.defaultIteration.path;
     }
 
+    var myCustomApplicationField = undefined;
+    for (let i=0; i< witType.fieldInstances.length; i++) {
+      if(witType.fieldInstances[i].referenceName == "Custom.Application") {
+        myCustomApplicationField = witType.fieldInstances[i];
+        break;
+      }
+    }
+
     if (
-      witType != undefined &&
-      witType.fieldInstances.find(f => {
-        return f.referenceName == "Custom.Application";
-      }) != undefined
+      witType != undefined && myCustomApplicationField != undefined
+      // witType.fieldInstances.find(f => {
+      //   return f.referenceName == "Custom.Application";
+      // }) != undefined
     ) {
       if (currentWorkItem["Custom.Application"] != undefined) {
         // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
