@@ -186,6 +186,12 @@ function createWorkItem(
       value: newWorkItemInfo["System.Comment"]
     });
 
+    workItem.push({
+      op: "add",
+      path: "/fields/System.Description",
+      value: newWorkItemInfo["System.Description"]
+    });
+
     // if template has no AreaPath field copies value from parent
     //if (taskTemplate.fieldInstances.find(f => { return f.referenceName == "System.AreaPath"; }) != undefined)
     {
@@ -237,13 +243,7 @@ function createWorkItem(
           value: ctx.project.name
         });
       }
-    } else {
-      workItem.push({
-        op: "add",
-        path: "/fields/System.Description",
-        value: ctx.project.name
-      });
-    }
+    } 
 
     workItem.push({
       op: "add",
@@ -288,9 +288,15 @@ function createWorkItem(
                 }
               }
             ]);
+
             service.setFieldValue(
               "System.History",
               newWorkItemInfo["System.Comment"]
+            );
+
+            service.setFieldValue(
+              "System.Description",
+              newWorkItemInfo["System.Description"]
             );
 
             // //Save
@@ -319,6 +325,11 @@ function createWorkItem(
                 op: "add",
                 path: "/fields/System.History",
                 value: newWorkItemInfo["System.Comment"]
+              },
+              {
+                op: "add",
+                path: "/fields/System.Description",
+                value: newWorkItemInfo["System.Description"]
               }
             ];
 
@@ -355,6 +366,7 @@ function createWorkItem(
       "System.Title": newWorkItemInfo["System.Title"],
       "System.AreaPath": teamAreaPath,
       "System.History": newWorkItemInfo["System.Comment"],
+      "System.Description": newWorkItemInfo["System.Description"],
       "System.IterationPath":
         targetTeamSettings.backlogIteration.name,
       "System.TeamProject": targetTeam.project
@@ -387,9 +399,7 @@ function createWorkItem(
       } else {
         newWITParams["Custom.Application"] = ctx.project.name;
       }
-    } else {
-      newWITParams["System.Description"] = ctx.project.name;
-    }
+    } 
     return newWITParams;
   }
 }
@@ -413,6 +423,7 @@ function AddRelationToCurrentWorkItem(
       }
     ]);
     service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
+    service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
     //Save
     service.save().then(
       function(response) {
@@ -439,6 +450,11 @@ function AddRelationToCurrentWorkItem(
         op: "add",
         path: "/fields/System.History",
         value: newWorkItemInfo["System.Comment"]
+      },
+      {
+        op: "add",
+        path: "/fields/System.Description",
+        value: newWorkItemInfo["System.Description"]
       }
     ];
     witClient

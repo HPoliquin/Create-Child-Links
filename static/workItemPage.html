@@ -11,135 +11,135 @@
 
   <script>
     VSS.init({
-        usePlatformScripts: true,
-        usePlatformStyles: true,
-        explicitNotifyLoaded: true
-      });
+      usePlatformScripts: true,
+      usePlatformStyles: true,
+      explicitNotifyLoaded: true
+    });
 
-      // Load main entry point for extension
-      VSS.require(
-        [
-          "scripts/app",
-          "TFS/Dashboards/WidgetHelpers",
-          "TFS/WorkItemTracking/Services",
-          "TFS/WorkItemTracking/RestClient",
-          "TFS/Core/RestClient",
-          "VSS/Controls"
-        ],
-        function(app, _WidgetHelpers, _WorkItemServices, _WorkRestClient, _coreRestClient, _Controls ) {
-          _WidgetHelpers.IncludeWidgetStyles();
-          _WidgetHelpers.IncludeWidgetConfigurationStyles();
+    // Load main entry point for extension
+    VSS.require(
+      [
+        "scripts/app",
+        "TFS/Dashboards/WidgetHelpers",
+        "TFS/WorkItemTracking/Services",
+        "TFS/WorkItemTracking/RestClient",
+        "TFS/Core/RestClient",
+        "VSS/Controls"
+      ],
+      function (app, _WidgetHelpers, _WorkItemServices, _WorkRestClient, _coreRestClient, _Controls) {
+        _WidgetHelpers.IncludeWidgetStyles();
+        _WidgetHelpers.IncludeWidgetConfigurationStyles();
 
-          var extensionCtx = VSS.getExtensionContext();
-          var webCtx = VSS.getWebContext();
-          // Build absolute contribution ID for dialogContent
-          var contributionId =
-            extensionCtx.publisherId +
-            "." +
-            extensionCtx.extensionId +
-            ".create-child-links-work-item-form-page";
+        var extensionCtx = VSS.getExtensionContext();
+        var webCtx = VSS.getWebContext();
+        // Build absolute contribution ID for dialogContent
+        var contributionId =
+          extensionCtx.publisherId +
+          "." +
+          extensionCtx.extensionId +
+          ".create-child-links-work-item-form-page";
 
-          // Get the WorkItemFormService.  This service allows you to get/set fields/links on the 'active' work item (the work item
-          // that currently is displayed in the UI).
-          function getWorkItemFormService() {
-            return _WorkItemServices.WorkItemFormService.getService();
+        // Get the WorkItemFormService.  This service allows you to get/set fields/links on the 'active' work item (the work item
+        // that currently is displayed in the UI).
+        function getWorkItemFormService() {
+          return _WorkItemServices.WorkItemFormService.getService();
+        }
+
+        // Register a listener for the work item group contribution.
+        VSS.register("create-child-links-work-item-form-page", function () {
+          var callbacks = [];
+
+          function inputChanged() {
+            // Execute registered callbacks
+            for (var i = 0; i < callbacks.length; i++) {
+              callbacks[i](isValid());
+            }
           }
 
-          // Register a listener for the work item group contribution.
-          VSS.register("create-child-links-work-item-form-page", function() {
-            var callbacks = [];
+          function isValid() {
+            // Check whether form is valid or not
+            let teamIndex = $("select.linkdialog-team-select").prop(
+              "selectedIndex"
+            );
 
-            function inputChanged() {
-              // Execute registered callbacks
-              for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i](isValid());
-              }
-            }
+            let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
+              "selectedIndex"
+            );
+            let wittTpeIndex = $("select.linkdialog-wittype-select").prop(
+              "selectedIndex"
+            );
+            let titreLength = $("input#dialog-label").val().length;
+            return (
+              teamIndex > 0 && linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
+            ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
+          }
 
-            function isValid() {
-              // Check whether form is valid or not
-              let teamIndex = $("select.linkdialog-team-select").prop(
-                "selectedIndex"
-              );
-
-              let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
-                "selectedIndex"
-              );
-              let wittTpeIndex = $("select.linkdialog-wittype-select").prop(
-                "selectedIndex"
-              );
-              let titreLength = $("input#dialog-label").val().length;
-              return (
-                teamIndex > 0 && linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
-              ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
-            }
-
-            function getFormData() {
-              // Get form values
-              return {
-                linkType: $("select.linkdialog-linktype-select").val(),
-                witType: $("select.linkdialog-wittype-select option:selected").html(),
-                "System.Title": $("input#dialog-label").val(),
-                "System.Comment": $("textarea#comment").val(),
-                "Team": $("select.linkdialog-team-select option:selected").text(),
-                "TeamId": $("select.linkdialog-team-select").val()
-              };
-            }
-
+          function getFormData() {
+            // Get form values
             return {
-              load: function(widgetSettings) {
-                var client = _WorkRestClient.getClient();
+              linkType: $("select.linkdialog-linktype-select").val(),
+              witType: $("select.linkdialog-wittype-select option:selected").html(),
+              "System.Title": $("input#dialog-label").val(),
+              "System.Comment": $("textarea#comment").val(),
+              "System.Description": $("textarea#description").val(),
+              "Team": $("select.linkdialog-team-select option:selected").text(),
+              "TeamId": $("select.linkdialog-team-select").val()
+            };
+          }
 
-                var targetProjectName = "DSD";
-                var coreClient = _coreRestClient.getClient();
-                coreClient.getProject(targetProjectName).then(function(project) {
-                  coreClient.getTeams(project.id).then(function(teams){
-                    $("select.linkdialog-team-select").find('option')
-                                    .remove()
-                                    .end()
-                                    .append("<option>Choisir l'équipe</option>")
-                                    .val('');
-                    teams.forEach(function(team) {
-                      $("select.linkdialog-team-select").append(
-                        $("<option>", {
-                          value: team.id,
-                          text: team.name
-                        })
-                      );
-                    });
+          return {
+            load: function (widgetSettings) {
+              var client = _WorkRestClient.getClient();
+
+              var targetProjectName = "DSD";
+              var coreClient = _coreRestClient.getClient();
+              coreClient.getProject(targetProjectName).then(function (project) {
+                coreClient.getTeams(project.id).then(function (teams) {
+                  $("select.linkdialog-team-select").find('option')
+                    .remove()
+                    .end()
+                    .append("<option>Choisir l'équipe</option>")
+                    .val('');
+                  teams.forEach(function (team) {
+                    $("select.linkdialog-team-select").append(
+                      $("<option>", {
+                        value: team.id,
+                        text: team.name
+                      })
+                    );
                   });
+                });
 
-                  client
+                client
                   .getWorkItemTypeCategories(project.id)
-                  .then(function(witCategories) {
-                      var category = undefined;
-                      for (let i=0; i< witCategories.length; i++) {
-                        if(witCategories[i].referenceName == "Microsoft.RequirementCategory") {
-                          category = witCategories[i];
-                          break;
-                        }
+                  .then(function (witCategories) {
+                    var category = undefined;
+                    for (let i = 0; i < witCategories.length; i++) {
+                      if (witCategories[i].referenceName == "Microsoft.RequirementCategory") {
+                        category = witCategories[i];
+                        break;
                       }
+                    }
 
-                      // var category = witCategories.find(function(category) { category.referenceName == "Microsoft.RequirementCategory"});
-                      let witTypeAdded = 0;
-                      if(category!=undefined || category.workItemTypes.length == 0)
-                      {
-                        category.workItemTypes.forEach(function(wit) {
-                                witTypeAdded++;
-                                $("select.linkdialog-wittype-select").append(
-                                  $("<option>", {
-                                    value: wit.name,
-                                    text: wit.name
-                                  })
-                                );
-                        });
-                      } 
-                      if(witTypeAdded == 0) {
-                        client
+                    // var category = witCategories.find(function(category) { category.referenceName == "Microsoft.RequirementCategory"});
+                    let witTypeAdded = 0;
+                    if (category != undefined || category.workItemTypes.length == 0) {
+                      category.workItemTypes.forEach(function (wit) {
+                        witTypeAdded++;
+                        $("select.linkdialog-wittype-select").append(
+                          $("<option>", {
+                            value: wit.name,
+                            text: wit.name
+                          })
+                        );
+                      });
+                    }
+                    if (witTypeAdded == 0) {
+                      client
                         .getWorkItemTypes(project.id)
-                        .then(function(witTypes) {
-                          witTypes.forEach(function(element) {
-                            if(element.isDisabled === false) {
+                        .then(function (witTypes) {
+                          witTypes.forEach(function (element) {
+                            if (element.isDisabled === false) {
                               $("select.linkdialog-wittype-select").append(
                                 $("<option>", {
                                   value: element.name,
@@ -149,101 +149,140 @@
                             }
                           });
                         });
-                      }
-                  });
-
-                  
-
-
-                });
-
-                client.getRelationTypes().then(function(relationsTypes) {
-                  relationsTypes.forEach(function(element) {
-                    // Limit to Child link type
-                    if(element.attributes.enabled === true 
-                        && element.referenceName == "System.LinkTypes.Hierarchy-Forward") {
-                      $("select.linkdialog-linktype-select").append(
-                        $("<option>", {
-                          value: element.referenceName,
-                          text: element.name
-                        })
-                      );
                     }
                   });
+
+
+
+
+              });
+
+              client.getRelationTypes().then(function (relationsTypes) {
+                relationsTypes.forEach(function (element) {
+                  // Limit to Child link type
+                  if (element.attributes.enabled === true &&
+                    element.referenceName == "System.LinkTypes.Hierarchy-Forward") {
+                    $("select.linkdialog-linktype-select").append(
+                      $("<option>", {
+                        value: element.referenceName,
+                        text: element.name
+                      })
+                    );
+                  }
                 });
+              });
 
 
-                $("select.linkdialog-linktype-select").bind(
-                  "change",
-                  inputChanged
-                );
+              $("select.linkdialog-linktype-select").bind(
+                "change",
+                inputChanged
+              );
 
-                $("select.linkdialog-wittype-select").bind(
-                  "change",
-                  inputChanged
-                );
+              $("select.linkdialog-wittype-select").bind(
+                "change",
+                inputChanged
+              );
 
-                $("input#dialog-label").bind("change", inputChanged);
+              $("input#dialog-label").bind("change", inputChanged);
 
-                $("textarea#comment").bind("change", inputChanged);
+              $("textarea#comment").bind("change", inputChanged);
 
-                return _WidgetHelpers.WidgetStatusHelper.Success();
-              },
+              $("textarea#description").bind("change", inputChanged);
 
-              isFormValid: function() {
-                return isValid();
-              },
+              return _WidgetHelpers.WidgetStatusHelper.Success();
+            },
 
-              getFormData: function() {
-                return getFormData();
-              },
+            isFormValid: function () {
+              return isValid();
+            },
 
-              attachFormChanged: function(cb) {
-                callbacks.push(cb);
-              }
-            };
-          });
-          VSS.notifyLoadSucceeded();
-        }
-      );
-    </script>
+            getFormData: function () {
+              return getFormData();
+            },
+
+            attachFormChanged: function (cb) {
+              callbacks.push(cb);
+            }
+          };
+        });
+        VSS.notifyLoadSucceeded();
+      }
+    );
+  </script>
+
+  <style>
+    .column {
+      float: left;
+      width: 45%;
+      padding: 5px;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  </style>
 
   <div class="widget-configuration">
     <div class="content">
       <div class="current-work-item"></div>
 
       <div class="link-dialog-form-container bowtie">
-        <div class="dialog modal-dialog link-dialog" style="width: 100%;">
+        <div class="dialog modal-dialog link-dialog" style="width: 95%;">
 
-          <div class="dropdown">
-            <label>Équipe de DSD</label>
-            <div class="wrapper">
-              <select class="linkdialog-team-select"></select>
+          <div class="row">
+            <div class="column">
+                <div class="dropdown">
+                    <label>Équipe de DSD</label>
+                    <div class="wrapper">
+                      <select class="linkdialog-team-select"></select>
+                    </div>
+                  </div>
             </div>
           </div>
 
-          <div class="dropdown">
-            <label>Type de lien</label>
-            <div class="wrapper">
-              <select class="linkdialog-linktype-select"></select>
+          <div class="row">
+            <div class="column">
+                <div class="dropdown">
+                    <label>Type de lien</label>
+                    <div class="wrapper">
+                      <select class="linkdialog-linktype-select"></select>
+                    </div>
+                  </div>
+            </div>
+            <div class="column">
+                <div class="dropdown">
+                    <label>Type d'élément de travail</label>
+                    <div class="wrapper">
+                      <select class="linkdialog-wittype-select"></select>
+                    </div>
+                  </div>
             </div>
           </div>
 
-          <div class="dropdown">
-            <label>Type d'élément de travail</label>
-            <div class="wrapper">
-              <select class="linkdialog-wittype-select"></select>
+          <div class="row" style="padding: 5px;">
+            <label class="dialog-linkform-label" for="dialog-label">Titre</label>
+            <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text"
+              id="dialog-label" />
+            <div class="message"></div>
+          </div>
+
+          <div class="row" style="padding: 5px;">
+            <div class="multi-line-text-input">
+              <label for="description">Description</label>
+              <textarea id="description" style="height: 120px; width: 100%"></textarea>
             </div>
           </div>
 
-          <label class="dialog-linkform-label" for="dialog-label">Titre</label>
-          <input class="textbox link-dialog-title-textbox link-dialog-width-100 initial-focus" type="text" id="dialog-label" />
-          <div id="description" class="message"></div>
-
-          <div class="multi-line-text-input">
-            <label for="comment">Commentaires</label>
-            <textarea id="comment" maxlength="255" style="height: 150px;"></textarea>
+          <div class="row" style="padding: 5px;">
+            <div class="multi-line-text-input">
+              <label for="comment">Commentaires</label>
+              <textarea id="comment" maxlength="255" style="height: 95px; width: 100%"></textarea>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
