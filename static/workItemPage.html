@@ -56,8 +56,24 @@
             }
           }
 
+          function projectChanged() {
+            let project = $("select.linkdialog-project-select").val();
+            if(project !== undefined && project.length > 0)
+            {
+              getTeams(project);
+            }
+            // Execute registered callbacks
+            for (var i = 0; i < callbacks.length; i++) {
+              callbacks[i](isValid());
+            }
+          }
+
           function isValid() {
             // Check whether form is valid or not
+            let projectIndex = $("select.linkdialog-project-select").prop(
+              "selectedIndex"
+            );
+
             let teamIndex = $("select.linkdialog-team-select").prop(
               "selectedIndex"
             );
@@ -69,8 +85,9 @@
               "selectedIndex"
             );
             let titreLength = $("input#dialog-label").val().length;
+
             return (
-              teamIndex > 0 && linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
+              projectIndex > 0 && teamIndex > 0 && linkTypeIndex >= 0 && wittTpeIndex >= 0 && titreLength > 0
             ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
           }
 
@@ -82,24 +99,58 @@
               "System.Title": $("input#dialog-label").val(),
               "System.Comment": $("textarea#comment").val(),
               "System.Description": $("textarea#description").val(),
+              "Project" : $("select.linkdialog-project-select option:selected").text(),
+              "ProjectId" : $("select.linkdialog-project-select option:selected").val(),
               "Team": $("select.linkdialog-team-select option:selected").text(),
               "TeamId": $("select.linkdialog-team-select").val()
             };
           }
 
-          return {
-            load: function (widgetSettings) {
-              var client = _WorkRestClient.getClient();
+          function isProjectIncluded(aProject) {
+            projectList = ["DSD"];
+            return projectList.includes(aProject.name);
+          }
 
-              var targetProjectName = "DSD";
-              var coreClient = _coreRestClient.getClient();
-              coreClient.getProject(targetProjectName).then(function (project) {
+          function getProjects() {
+            var client = _WorkRestClient.getClient();
+
+            var coreClient = _coreRestClient.getClient();
+            coreClient.getProjects().then(function (projects) {
+              if(projects !== undefined && projects.length > 0) {
+                $("select.linkdialog-project-select").find('option')
+                  .remove()
+                  .end()
+                  .append("<option>Choisir le projet</option>")
+                  .val('');
+
+                projects.forEach(function (project) {
+                  if(isProjectIncluded(project))
+                  {
+                    $("select.linkdialog-project-select").append(
+                      $("<option>", {
+                        value: project.id,
+                        text: project.name
+                      })
+                    );
+                  }
+                });
+              }
+            });
+          }
+
+          function getTeams(targetProjectId) {
+            if(targetProjectId !== undefined && targetProjectId.length > 0){
+              let client = _WorkRestClient.getClient();
+              //var targetProjectId = "DSD";
+              let coreClient = _coreRestClient.getClient();
+              coreClient.getProject(targetProjectId).then(function (project) {
                 coreClient.getTeams(project.id).then(function (teams) {
                   $("select.linkdialog-team-select").find('option')
                     .remove()
                     .end()
                     .append("<option>Choisir l'équipe</option>")
                     .val('');
+
                   teams.forEach(function (team) {
                     $("select.linkdialog-team-select").append(
                       $("<option>", {
@@ -124,6 +175,11 @@
                     // var category = witCategories.find(function(category) { category.referenceName == "Microsoft.RequirementCategory"});
                     let witTypeAdded = 0;
                     if (category != undefined || category.workItemTypes.length == 0) {
+                      $("select.linkdialog-wittype-select").find('option')
+                          .remove()
+                          .end()
+                          .val('');
+
                       category.workItemTypes.forEach(function (wit) {
                         witTypeAdded++;
                         $("select.linkdialog-wittype-select").append(
@@ -151,12 +207,15 @@
                         });
                     }
                   });
-
-
-
-
               });
+            }
+          }
 
+          return {
+            load: function (widgetSettings) {
+              getProjects();
+
+              let client = _WorkRestClient.getClient();
               client.getRelationTypes().then(function (relationsTypes) {
                 relationsTypes.forEach(function (element) {
                   // Limit to Child link type
@@ -172,24 +231,41 @@
                 });
               });
 
+              $("select.linkdialog-project-select").on(
+                "change",
+                projectChanged
+              );
 
-              $("select.linkdialog-linktype-select").bind(
+              $("select.linkdialog-team-select").on(
                 "change",
                 inputChanged
               );
 
-              $("select.linkdialog-wittype-select").bind(
+              $("select.linkdialog-linktype-select").on(
                 "change",
                 inputChanged
               );
 
-              $("input#dialog-label").bind("change", inputChanged);
+              $("select.linkdialog-wittype-select").on(
+                "change",
+                inputChanged
+              );
 
-              $("textarea#comment").bind("change", inputChanged);
+              $("input#dialog-label").on("change", inputChanged);
 
-              $("textarea#description").bind("change", inputChanged);
+              $("textarea#comment").on("change", inputChanged);
+
+              $("textarea#description").on("change", inputChanged);
 
               return _WidgetHelpers.WidgetStatusHelper.Success();
+            },
+
+            getProjects: function () {
+              return getProjects();
+            },
+
+            getTeams: function (teamName) {
+              return getTeams(teamName);
             },
 
             isFormValid: function () {
@@ -205,6 +281,7 @@
             }
           };
         });
+
         VSS.notifyLoadSucceeded();
       }
     );
@@ -226,6 +303,11 @@
   </style>
 
   <div class="widget-configuration">
+    <div class="title">
+      <div class="la-user-icon">
+
+      </div>
+    </div>
     <div class="content">
       <div class="current-work-item"></div>
 
@@ -233,15 +315,26 @@
         <div class="dialog modal-dialog link-dialog" style="width: 95%;">
 
           <div class="row">
+              <div class="column">
+                  <div class="dropdown">
+                      <label>Projet</label>
+                      <div class="wrapper">
+                        <select class="linkdialog-project-select"></select>
+                      </div>
+                    </div>
+              </div>
+  
             <div class="column">
                 <div class="dropdown">
-                    <label>Équipe de DSD</label>
+                    <label>Équipe</label>
                     <div class="wrapper">
                       <select class="linkdialog-team-select"></select>
                     </div>
                   </div>
             </div>
           </div>
+
+
 
           <div class="row">
             <div class="column">

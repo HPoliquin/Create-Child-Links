@@ -1,21 +1,10 @@
 ///<reference types="vss-web-extension-sdk" />
 
-//import * as Control from "VSS/Controls";
 import * as _VSSServices from "VSS/Service";
 import * as _WorkItemServices from "TFS/WorkItemTracking/Services";
 import * as _WorkItemRestClient from "TFS/WorkItemTracking/RestClient";
 import * as workRestClient from "TFS/Work/RestClient";
 import * as coreRestClient from "TFS/Core/RestClient";
-// import {
-//   Dialog,
-//   MessageDialog,
-//   MessageDialogButtons,
-//   ModalDialog,
-//   IDialogOptions,
-//   IModalDialogOptions
-// } from "VSS/Controls/Dialogs";
-// import * as Q from "Q";
-// import * as StatusIndicator from "VSS/Controls/StatusIndicator";
 import * as Dialogs from "VSS/Controls/Dialogs";
 import {
   TemplateType,
@@ -31,7 +20,6 @@ import {
   WebApiTeam,
   TeamProjectCollectionReference
 } from "TFS/Core/Contracts";
-// import * as Contracts from "VSS/WebApi/Contracts";
 
 interface TeamSettingInfo {
   project: string;
@@ -41,8 +29,6 @@ interface TeamSettingInfo {
 }
 
 var ctx: WebContext = null;
-
-var targetProjectName = "DSD";
 
 function WriteLog(msg) {
   console.log("Create-Child-Links: " + msg);
@@ -367,8 +353,7 @@ function createWorkItem(
       "System.AreaPath": teamAreaPath,
       "System.History": newWorkItemInfo["System.Comment"],
       "System.Description": newWorkItemInfo["System.Description"],
-      "System.IterationPath":
-        targetTeamSettings.backlogIteration.name,
+      "System.IterationPath": targetTeamSettings.backlogIteration.name,
       "System.TeamProject": targetTeam.project
     };
 
@@ -484,8 +469,8 @@ export function create(context, newWorkItemInfo) {
   };
 
   var targetTeam: TeamSettingInfo = {
-    project: targetProjectName,
-    projectId: "",
+    project: newWorkItemInfo.Project,
+    projectId: newWorkItemInfo.ProjectId,
     team: newWorkItemInfo.Team,
     teamId: newWorkItemInfo.TeamId
   };

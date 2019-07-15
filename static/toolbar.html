@@ -44,7 +44,7 @@
 
                                 // Show dialog
                                 var dialogOptions = {
-                                    title: "Créer une demande de soutien DSD",
+                                    title: "Créer une demande de soutien",
                                     width: 1000,
                                     height: 600,
                                     getDialogResult: function () {
@@ -62,10 +62,8 @@
                                     function (
                                         dialog) {
                                         // Get registrationForm instance which is registered in registrationFormContent.html
-                                        dialog.getContributionInstance(
-                                            "create-child-links-work-item-form-page").then(
-                                            function (
-                                                registrationFormInstance) {
+                                        dialog.getContributionInstance("create-child-links-work-item-form-page").then(
+                                            function (registrationFormInstance) {
 
                                                 // Keep a reference of registration form instance (to be used above in dialog options)
                                                 dialogReturn = registrationFormInstance;

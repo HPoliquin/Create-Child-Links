@@ -2,7 +2,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var ctx = null;
-    var targetProjectName = "DSD";
     function WriteLog(msg) {
         console.log("Create-Child-Links: " + msg);
     }
@@ -270,8 +269,8 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             team: ctx.team.name
         };
         var targetTeam = {
-            project: targetProjectName,
-            projectId: "",
+            project: newWorkItemInfo.Project,
+            projectId: newWorkItemInfo.ProjectId,
             team: newWorkItemInfo.Team,
             teamId: newWorkItemInfo.TeamId
         };

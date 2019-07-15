@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.1.326",
+    "version": "0.1.361",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -34,16 +34,14 @@
             "id": "create-child-links-work-item-button",
             "type": "ms.vss-web.action",
             "targets": [
-                "ms.vss-work-web.work-item-toolbar-menu", 
-                "ms.vss-work-web.backlog-item-menu",
-                "ms.vss-work-web.work-item-context-menu"
+                "ms.vss-work-web.work-item-toolbar-menu"
             ],
             "properties": {
                 "name": "Create Child Links",
                 "uri": "static/toolbar.html",
-                "text": "Créer une demande de soutien DSD",
+                "text": "Créer une demande de soutien",
                 "title": "Create child links",
-                "toolbarText": "Créer une demande de soutien DSD",
+                "toolbarText": "Créer une demande de soutien",
                 "icon": "static/img/one-click16.png",
                 "groupId": "actions",
                 "registeredObjectId": "create-child-links-work-item-button"
@@ -57,7 +55,7 @@
                 "ms.vss-work-web.work-item-form"
             ],
             "properties": {
-                "name": "My Page",
+                "name": "Creation demande de soutien",
                 "uri": "static/workItemPage.html"
             } 
         }
