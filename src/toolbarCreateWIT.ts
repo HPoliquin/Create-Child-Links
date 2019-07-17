@@ -280,11 +280,6 @@ function createWorkItem(
               newWorkItemInfo["System.Comment"]
             );
 
-            service.setFieldValue(
-              "System.Description",
-              newWorkItemInfo["System.Description"]
-            );
-
             // //Save
             // service.save().then(function(response) {
             //   WriteLog(" Saved");
@@ -311,11 +306,6 @@ function createWorkItem(
                 op: "add",
                 path: "/fields/System.History",
                 value: newWorkItemInfo["System.Comment"]
-              },
-              {
-                op: "add",
-                path: "/fields/System.Description",
-                value: newWorkItemInfo["System.Description"]
               }
             ];
 
@@ -408,7 +398,7 @@ function AddRelationToCurrentWorkItem(
       }
     ]);
     service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
-    service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
+    // service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
     //Save
     service.save().then(
       function(response) {
@@ -435,12 +425,12 @@ function AddRelationToCurrentWorkItem(
         op: "add",
         path: "/fields/System.History",
         value: newWorkItemInfo["System.Comment"]
-      },
-      {
-        op: "add",
-        path: "/fields/System.Description",
-        value: newWorkItemInfo["System.Description"]
-      }
+      }//,
+      // {
+      //   op: "add",
+      //   path: "/fields/System.Description",
+      //   value: newWorkItemInfo["System.Description"]
+      // }
     ];
     witClient
       .updateWorkItem(jsondoc, currentWorkItem.id)

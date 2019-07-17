@@ -10,7 +10,8 @@
         ],
         "lib": [
             "es5",
-            "ES2015.Collection",
+            "es7",
+            "es2015.collection",
             "dom",
             "es2015.iterable",
             "es2015.promise"
@@ -29,7 +30,9 @@
         "Graphics"
     ],
     "files": [
-        "src/app.ts",
-        "src/toolbarCreateWIT.ts"
+        "src/configurationAction.ts",
+        "src/toolbarAction.ts",
+        "src/toolbarCreateWIT.ts",
+        "src/workItemPage.ts"
     ]
 }

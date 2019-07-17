@@ -126,7 +126,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                         }
                     ]);
                     service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
-                    service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
                 }
                 else {
                     var workItemId = currentWorkItemFields["System.Id"];
@@ -146,11 +145,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                             op: "add",
                             path: "/fields/System.History",
                             value: newWorkItemInfo["System.Comment"]
-                        },
-                        {
-                            op: "add",
-                            path: "/fields/System.Description",
-                            value: newWorkItemInfo["System.Description"]
                         }
                     ];
                     witClient
@@ -217,7 +211,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                 }
             ]);
             service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
-            service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
             service.save().then(function (response) {
                 WriteLog(" Saved");
             }, function (error) {
@@ -241,11 +234,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                     op: "add",
                     path: "/fields/System.History",
                     value: newWorkItemInfo["System.Comment"]
-                },
-                {
-                    op: "add",
-                    path: "/fields/System.Description",
-                    value: newWorkItemInfo["System.Description"]
                 }
             ];
             witClient

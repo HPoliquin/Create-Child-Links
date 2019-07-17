@@ -21,76 +21,76 @@
 
         VSS.require(
             [
-                "scripts/toolbarCreateWIT",
+                "scripts/toolbarAction",
                 "TFS/WorkItemTracking/Services",
                 "TFS/WorkItemTracking/RestClient"
             ],
-            function (toolbarCreateWIT, _WorkItemServices, _WorkRestClient) {
+            function (toolbarAction, _WorkItemServices, _WorkRestClient) {
                 // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
-                var menuContributionHandler = (function (context) {
-                    "use strict";
-                    return {
-                        // This is a callback that gets invoked when a user clicks the newly contributed menu item
-                        // The actionContext parameter contains context data surrounding the circumstances of this
-                        // action getting invoked.
-                        execute: function (actionContext) {
-                            let dialogReturn;
-                            VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
-                                var extensionCtx = VSS.getExtensionContext();
-                                // Build absolute contribution ID for dialogContent
-                                var contributionId = extensionCtx.publisherId + "." +
-                                    extensionCtx.extensionId +
-                                    ".create-child-links-work-item-form-page";
+                // var menuContributionHandler = (function (context) {
+                //     "use strict";
+                //     return {
+                //         // This is a callback that gets invoked when a user clicks the newly contributed menu item
+                //         // The actionContext parameter contains context data surrounding the circumstances of this
+                //         // action getting invoked.
+                //         execute: function (actionContext) {
+                //             let dialogReturn;
+                //             VSS.getService(VSS.ServiceIds.Dialog).then(function (dialogService) {
+                //                 var extensionCtx = VSS.getExtensionContext();
+                //                 // Build absolute contribution ID for dialogContent
+                //                 var contributionId = extensionCtx.publisherId + "." +
+                //                     extensionCtx.extensionId +
+                //                     ".create-child-links-work-item-form-page";
 
-                                // Show dialog
-                                var dialogOptions = {
-                                    title: "Créer une demande de soutien",
-                                    width: 1000,
-                                    height: 600,
-                                    getDialogResult: function () {
-                                        // Get the result from registrationForm object
-                                        return dialogReturn ? dialogReturn.getFormData() :
-                                            null;
-                                    },
-                                    okCallback: function (result) {
-                                        // Log the result to the console
-                                        toolbarCreateWIT.create(actionContext, result);
-                                    }
-                                };
+                //                 // Show dialog
+                //                 var dialogOptions = {
+                //                     title: "Créer une demande de soutien",
+                //                     width: 1000,
+                //                     height: 600,
+                //                     getDialogResult: function () {
+                //                         // Get the result from registrationForm object
+                //                         return dialogReturn ? dialogReturn.getFormData() :
+                //                             null;
+                //                     },
+                //                     okCallback: function (result) {
+                //                         // Log the result to the console
+                //                         toolbarCreateWIT.create(actionContext, result);
+                //                     }
+                //                 };
 
-                                dialogService.openDialog(contributionId, dialogOptions).then(
-                                    function (
-                                        dialog) {
-                                        // Get registrationForm instance which is registered in registrationFormContent.html
-                                        dialog.getContributionInstance("create-child-links-work-item-form-page").then(
-                                            function (registrationFormInstance) {
+                //                 dialogService.openDialog(contributionId, dialogOptions).then(
+                //                     function (
+                //                         dialog) {
+                //                         // Get registrationForm instance which is registered in registrationFormContent.html
+                //                         dialog.getContributionInstance("create-child-links-work-item-form-page").then(
+                //                             function (registrationFormInstance) {
 
-                                                // Keep a reference of registration form instance (to be used above in dialog options)
-                                                dialogReturn = registrationFormInstance;
+                //                                 // Keep a reference of registration form instance (to be used above in dialog options)
+                //                                 dialogReturn = registrationFormInstance;
 
-                                                dialogReturn.load();
+                //                                 dialogReturn.load();
 
-                                                // Subscribe to form input changes and update the Ok enabled state
-                                                dialogReturn.attachFormChanged(function (
-                                                    isValid) {
-                                                    dialog.updateOkButton(
-                                                        isValid);
-                                                });
+                //                                 // Subscribe to form input changes and update the Ok enabled state
+                //                                 dialogReturn.attachFormChanged(function (
+                //                                     isValid) {
+                //                                     dialog.updateOkButton(
+                //                                         isValid);
+                //                                 });
 
-                                                // Set the initial ok enabled state
-                                                dialogReturn.isFormValid().then(
-                                                    function (isValid) {
-                                                        dialog.updateOkButton(
-                                                            isValid);
-                                                    });
-                                            });
-                                    });
-                            });
-                        }
-                    };
-                });
+                //                                 // Set the initial ok enabled state
+                //                                 dialogReturn.isFormValid().then(
+                //                                     function (isValid) {
+                //                                         dialog.updateOkButton(
+                //                                             isValid);
+                //                                     });
+                //                             });
+                //                     });
+                //             });
+                //         }
+                //     };
+                // });
 
-                VSS.register("create-child-links-work-item-button", menuContributionHandler);
+                VSS.register("create-child-links-work-item-button", toolbarAction.toolbarActionHandler);
 
                 VSS.notifyLoadSucceeded();
             }

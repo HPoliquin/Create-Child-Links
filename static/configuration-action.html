@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!-- VSS Framework -->
+    <script src="../lib/VSS.SDK.min.js"></script>
+    <style>
+        body {
+            background-color: rgb(0, 67, 117);
+            color: white;
+            margin: 10px;    
+            font-family: "Segoe UI VSS (Regular)","-apple-system",BlinkMacSystemFont,"Segoe UI",sans-serif;
+        }
+    </style>
+    <script type="text/javascript">
+        VSS.init({
+            explicitNotifyLoaded: true,
+            usePlatformScripts: true,
+            usePlatformStyles: true
+        });
+
+        VSS.require(
+            [
+                "scripts/configurationAction",
+                "TFS/WorkItemTracking/Services",
+                "TFS/WorkItemTracking/RestClient"
+            ],
+            function (_configuration, _WorkItemServices, _WorkRestClient) {
+                // // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
+                // var menuContributionHandler = (function (context) {
+                //     "use strict";
+                //     return {
+                        
+                //     };
+                // });
+                console.log(_configuration);
+                VSS.register("create-child-links-configuration-button", _configuration.configurationActionHandler);
+
+                VSS.notifyLoadSucceeded();
+            }
+        );
+    </script>
+</head>
+
+<body>
+
+
+</body>
+
+</html>
