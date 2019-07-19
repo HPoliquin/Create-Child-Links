@@ -18,22 +18,16 @@ export function configurationActionHandler(context) {
     // action getting invoked.
     execute: function(actionContext) {
       let dialogReturn;
+
+
       VSS.getService(VSS.ServiceIds.Dialog).then(function(
         dialogService: IHostDialogService
       ) {
-        var extensionCtx = VSS.getExtensionContext();
-        // Build absolute contribution ID for dialogContent
-        var contributionId =
-          extensionCtx.publisherId +
-          "." +
-          extensionCtx.extensionId +
-          ".create-child-links-work-item-form-page";
-
         // Show dialog
         var dialogOptions = {
-          title: "Créer une demande de soutien",
-          width: 1000,
-          height: 600,
+          title: "Configuration de demande de soutien",
+          width: 800,
+          height: 450,
 
           getDialogResult: function() {
             // Get the result from registrationForm object
@@ -44,22 +38,30 @@ export function configurationActionHandler(context) {
             // Log the result to the console
             VSS.require(
                 [
-                    "scripts/toolbarCreateWIT"
+                    "scripts/configurationSetup"
                 ],
-                function (toolbarCreateWIT) {
-                    toolbarCreateWIT.create(actionContext, result);
+                function (configurationSetup) {
+                  configurationSetup.create(actionContext, result);
 
                     VSS.notifyLoadSucceeded();
                 });
           }
         };
 
+        let extensionCtx = VSS.getExtensionContext();
+        // Build absolute contribution ID for dialogContent
+        let contributionConfigurationId =
+          extensionCtx.publisherId +
+          "." +
+          extensionCtx.extensionId +
+          ".configuration-form-page";
+
         dialogService
-          .openDialog(contributionId, dialogOptions)
+          .openDialog(contributionConfigurationId, dialogOptions)
           .then(function(dialog) {
             // Get registrationForm instance which is registered in registrationFormContent.html
             dialog
-              .getContributionInstance("create-child-links-work-item-form-page")
+              .getContributionInstance(contributionConfigurationId)
               .then(function(registrationFormInstance) {
                 // Keep a reference of registration form instance (to be used above in dialog options)
                 dialogReturn = registrationFormInstance;
@@ -76,7 +78,11 @@ export function configurationActionHandler(context) {
                   dialog.updateOkButton(isValid);
                 });
               });
+          }, function(reason) {
+            console.log("Failed to open configuration page : ", reason);
           });
+      }, function(reason) {
+        console.log("failet to load vss configurations")
       });
     }
   };

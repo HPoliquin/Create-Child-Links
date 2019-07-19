@@ -52,7 +52,7 @@ function inputChanged() {
 
 function projectChanged() {
   let project = $("select.linkdialog-project-select").val();
-  if (project !== undefined && project.length > 0) {
+  if (project !== undefined && project !== null && project.length > 0) {
     getTeams(project);
   }
   // Execute registered callbacks

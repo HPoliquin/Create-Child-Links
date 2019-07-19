@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .column {
+            float: left;
+            width: 50%;
+            padding: 5px;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="https://www.google.ca/chrome">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+    <script src="../lib/VSS.SDK.min.js"></script>
+
+    <script>
+        VSS.init({
+            usePlatformScripts: true,
+            usePlatformStyles: true,
+            explicitNotifyLoaded: true
+        });
+
+        // Load main entry point for extension
+        VSS.require(
+            [
+                "scripts/configurationPage",
+                "TFS/Dashboards/WidgetHelpers",
+                "TFS/WorkItemTracking/Services",
+            ],
+            function (_configurationPage, _WidgetHelpers, _WorkItemServicesr) {
+                _WidgetHelpers.IncludeWidgetStyles();
+                _WidgetHelpers.IncludeWidgetConfigurationStyles();
+
+                // // Register a listener for the work item group contribution.
+                console.log("_configurationPage : ", _configurationPage);
+                VSS.register("configuration-form-page", _configurationPage.ConfigurationPageHandler);
+
+                VSS.notifyLoadSucceeded();
+            }
+        );
+    </script>
+
+    <div class="widget-configuration">
+        <div class="title">
+            <div class="la-user-icon">
+
+            </div>
+        </div>
+        <div id="target"></div>
+        <div class="content">
+            <div class="current-work-item"></div>
+
+            <div class="link-dialog-form-container bowtie">
+                <div class="dialog modal-dialog link-dialog" style="width: 95%;">
+
+                    <div class="row">
+                        <div class="column">
+                            <div class="dropdown">
+                                <label>Projets</label>
+                                <div class="wrapper">
+                                    <select class="linkdialog-project-select" multiple style="height: 250px;"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="dropdown">
+                                <label>Projets inclus</label>
+                                <div class="wrapper">
+                                    <select class="linkdialog-project-included-select" multiple style="height: 250px;"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="column">
+                            <button class="btn btn-add" disabled="true">Ajouter</button>
+                        </div>
+                        <div class="column">
+                            <button class="btn btn-remove" disabled="true">Retirer</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

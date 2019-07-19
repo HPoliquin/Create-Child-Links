@@ -21,16 +21,16 @@ export function toolbarActionHandler(context) {
       VSS.getService(VSS.ServiceIds.Dialog).then(function(
         dialogService: IHostDialogService
       ) {
-        var extensionCtx = VSS.getExtensionContext();
+        let extensionCtx = VSS.getExtensionContext();
         // Build absolute contribution ID for dialogContent
-        var contributionId =
+        let contributionId =
           extensionCtx.publisherId +
           "." +
           extensionCtx.extensionId +
           ".create-child-links-work-item-form-page";
 
         // Show dialog
-        var dialogOptions = {
+        let dialogOptions = {
           title: "Créer une demande de soutien",
           width: 1000,
           height: 600,
@@ -76,6 +76,8 @@ export function toolbarActionHandler(context) {
                   dialog.updateOkButton(isValid);
                 });
               });
+          }, function(reason) {
+            console.log("Failed to open create work item form", reason);
           });
       });
     }

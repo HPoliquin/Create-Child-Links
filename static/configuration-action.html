@@ -26,14 +26,6 @@
                 "TFS/WorkItemTracking/RestClient"
             ],
             function (_configuration, _WorkItemServices, _WorkRestClient) {
-                // // Use an IIFE to create an object that satisfies the IContributedMenuSource contract
-                // var menuContributionHandler = (function (context) {
-                //     "use strict";
-                //     return {
-                        
-                //     };
-                // });
-                console.log(_configuration);
                 VSS.register("create-child-links-configuration-button", _configuration.configurationActionHandler);
 
                 VSS.notifyLoadSucceeded();

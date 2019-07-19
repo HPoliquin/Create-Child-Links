@@ -31,6 +31,8 @@
     ],
     "files": [
         "src/configurationAction.ts",
+        "src/configurationPage.ts",
+        "src/configurationSetup.ts",
         "src/toolbarAction.ts",
         "src/toolbarCreateWIT.ts",
         "src/workItemPage.ts"
