@@ -19,7 +19,6 @@ export function configurationActionHandler(context) {
     execute: function(actionContext) {
       let dialogReturn;
 
-
       VSS.getService(VSS.ServiceIds.Dialog).then(function(
         dialogService: IHostDialogService
       ) {
@@ -43,7 +42,7 @@ export function configurationActionHandler(context) {
                 function (configurationSetup) {
                   configurationSetup.create(actionContext, result);
 
-                    VSS.notifyLoadSucceeded();
+                  VSS.notifyLoadSucceeded();
                 });
           }
         };
@@ -56,13 +55,17 @@ export function configurationActionHandler(context) {
           extensionCtx.extensionId +
           ".configuration-form-page";
 
+        
         dialogService
           .openDialog(contributionConfigurationId, dialogOptions)
           .then(function(dialog) {
-            // Get registrationForm instance which is registered in registrationFormContent.html
-            dialog
-              .getContributionInstance(contributionConfigurationId)
+
+            VSS.ready(function () {
+              // Get registrationForm instance which is registered in registrationFormContent.html
+              dialog
+              .getContributionInstance("configuration-form-page")
               .then(function(registrationFormInstance) {
+
                 // Keep a reference of registration form instance (to be used above in dialog options)
                 dialogReturn = registrationFormInstance;
 
@@ -78,6 +81,8 @@ export function configurationActionHandler(context) {
                   dialog.updateOkButton(isValid);
                 });
               });
+            });
+            
           }, function(reason) {
             console.log("Failed to open configuration page : ", reason);
           });

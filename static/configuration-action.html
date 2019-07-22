@@ -26,9 +26,11 @@
                 "TFS/WorkItemTracking/RestClient"
             ],
             function (_configuration, _WorkItemServices, _WorkRestClient) {
-                VSS.register("create-child-links-configuration-button", _configuration.configurationActionHandler);
+                VSS.ready(function () {
+                    VSS.register("create-child-links-configuration-button", _configuration.configurationActionHandler);
 
-                VSS.notifyLoadSucceeded();
+                    VSS.notifyLoadSucceeded();
+                });
             }
         );
     </script>

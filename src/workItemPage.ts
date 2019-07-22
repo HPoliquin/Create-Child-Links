@@ -9,6 +9,11 @@ import * as _coreRestClient from "TFS/Core/RestClient";
 import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 
+interface IProjectInfo {
+  project: string;
+  projectId: string;
+}
+
 var container = $(".widget-configuration");
 
 var waitControlOptions = {
@@ -42,6 +47,8 @@ function getWorkItemFormService() {
 }
 
 var callbacks = [];
+
+var projectList = [];
 
 function inputChanged() {
   // Execute registered callbacks
@@ -102,7 +109,6 @@ function getFormData() {
 }
 
 function isProjectIncluded(aProject) {
-  var projectList = ["DSD"];
   return projectList.includes(aProject.name);
 }
 
@@ -245,7 +251,27 @@ export function workItemFormPageHandler(context) {
   "use strict";
   return {
     load: function(widgetSettings) {
-      getProjects();
+      // Get data service
+      VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService: IExtensionDataService) {
+        // Get value in user scope
+        dataService.getValue("projectIncluded").then(function(value: string) {
+          if(value !== undefined) {
+            let myProjectList = JSON.parse(value);
+            $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
+              $.each(value, function(index, elementValue) {
+                projectList.push(elementValue.project)
+              });
+            });
+            getProjects();
+          }
+        }, function(reason) {
+          console.log("Failed to load the projectIncluded Setting", reason);
+          getProjects();
+        });
+      }, function(reason) {
+        console.log("Failed to load the IExtensionDataService", reason);
+        getProjects();
+      });
 
       let client = _WorkItemRestClient.getClient();
       client.getRelationTypes().then(function(relationsTypes) {

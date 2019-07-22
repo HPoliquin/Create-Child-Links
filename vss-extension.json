@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.2.50",
+    "version": "0.2.73",
     "name": "Create Child links",
     "description": "Create child link defined by templates",
     "public": false,
@@ -51,8 +51,8 @@
             "id": "create-child-links-configuration-button",
             "type": "ms.vss-web.action",
             "targets": [
-                "ms.vss-work-web.work-item-toolbar-menu",
-                "ms.vss-admin-web.collection-overview-toolbar-menu"
+                "ms.vss-admin-web.collection-overview-toolbar-menu",
+                "ms.vss-web.collection-admin-hub-group"
             ],
             "properties": {
                 "name": "Create Child Links Configuration",
@@ -70,7 +70,7 @@
             "type": "ms.vss-work-web.work-item-form-page",
             "description": "Custom work item form page",
             "targets": [
-                "ms.vss-work-web.work-item-form"
+                "ms.vss-web.collection-admin-hub-group"
             ],
             "properties": {
                 "name": "Configuration du formulaire de demande de soutien",

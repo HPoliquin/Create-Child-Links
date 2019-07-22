@@ -9,6 +9,11 @@ import * as _coreRestClient from "TFS/Core/RestClient";
 import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 
+interface IProjectInfo {
+  project: string;
+  projectId: string;
+}
+
 var container = $(".widget-configuration");
 
 var waitControlOptions = {
@@ -28,7 +33,11 @@ var waitControl = _Controls.create(
 
 var extensionCtx = VSS.getExtensionContext();
 var webCtx = VSS.getWebContext();
+
 var callbacks = [];
+var projectList = [];
+
+// // Build absolute contribution ID for dialogContent
 
 // Build absolute contribution ID for dialogContent
 var contributionId =
@@ -43,12 +52,12 @@ function getWorkItemFormService() {
   return _WorkItemServices.WorkItemFormService.getService();
 }
 
-function inputChanged() {
-  // Execute registered callbacks
-  for (var i = 0; i < callbacks.length; i++) {
-    callbacks[i](isValid());
-  }
-}
+// function inputChanged() {
+//   // Execute registered callbacks
+//   for (var i = 0; i < callbacks.length; i++) {
+//     callbacks[i](isValid());
+//   }
+// }
 
 function projectChanged() {
   let project = $("select.linkdialog-project-select").val();
@@ -77,18 +86,28 @@ function projectIncludedChanged() {
 }
 
 function isValid() {
-  return true;
+  return $("select.linkdialog-project-included-select option").length > 0;
 }
 
 function getFormData() {
   // Get form values
+  let ProjectSelected = [];
+  $.each($("select.linkdialog-project-included-select option"), function() {
+    let option : IProjectInfo = {
+      project : $(this).text(),
+      projectId : $(this).val()
+
+    }
+    ProjectSelected.push(option);
+  });
+
   return {
-    ProjectIncluded: $("input.linkdialog-project-included-select").val()
+    ProjectIncluded: ProjectSelected
   };
 }
 
 function isProjectIncluded(aProject) {
-  var projectList = ["DSD"];
+  
   return projectList.includes(aProject.name);
 }
 
@@ -103,9 +122,9 @@ function onAddedClick() {
     $("select.linkdialog-project-select").find("option:selected").remove()
     .end()
     .val("");
+
     projectChanged();
     projectIncludedChanged();
-    console.log("on added Clicked");
 }
 
 function onRemovedClick() {
@@ -118,15 +137,15 @@ function onRemovedClick() {
     $("select.linkdialog-project-included-select").find("option:selected").remove()
     .end()
     .val("");
+
     projectChanged();
     projectIncludedChanged();
-    console.log("on Removed Clicked");
 }
 
 
 function getProjects() {
   waitControl.startWait();
-  var client = _WorkItemRestClient.getClient();
+  // var client = _WorkItemRestClient.getClient();
 
   var coreClient = _coreRestClient.getClient();
   coreClient.getProjects().then(
@@ -175,7 +194,27 @@ export function ConfigurationPageHandler(context) {
   "use strict";
   return {
     load: function(widgetSettings) {
-      getProjects();
+      // Get data service
+      VSS.getService(VSS.ServiceIds.ExtensionData).then(function(dataService: IExtensionDataService) {
+        // Get value in user scope
+        dataService.getValue("projectIncluded").then(function(value: string) {
+          if(value !== undefined) {
+            let myProjectList = JSON.parse(value);
+            $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
+              $.each(value, function(index, elementValue) {
+                projectList.push(elementValue.project)
+              });
+            });
+            getProjects();
+          }
+        }, function(reason) {
+          console.log("Failed to load the projectIncluded Setting", reason);
+          getProjects();
+        });
+      }, function(reason) {
+        console.log("Failed to load the IExtensionDataService", reason);
+        getProjects();
+      });
 
       $("select.linkdialog-project-select").on("change", projectChanged);
 
