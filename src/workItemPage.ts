@@ -109,7 +109,7 @@ function getFormData() {
 }
 
 function isProjectIncluded(aProject) {
-  return projectList.includes(aProject.name);
+  return projectList.includes(aProject.id);
 }
 
 function getProjects() {
@@ -126,6 +126,10 @@ function getProjects() {
           .end()
           .append("<option>Choisir le projet</option>")
           .val("");
+
+        projects.sort(function(project1, project2) {
+          return project2.name.toUpperCase() < project1.name.toUpperCase() ? 1 : -1;
+        })
 
         projects.forEach(function(project) {
           if (isProjectIncluded(project)) {
@@ -259,9 +263,11 @@ export function workItemFormPageHandler(context) {
             let myProjectList = JSON.parse(value);
             $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
               $.each(value, function(index, elementValue) {
-                projectList.push(elementValue.project)
+                projectList.push(elementValue.projectId)
               });
             });
+            getProjects();
+          } else {
             getProjects();
           }
         }, function(reason) {
