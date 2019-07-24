@@ -147,7 +147,7 @@ function getProjects() {
   // var client = _WorkItemRestClient.getClient();
 
   var coreClient = _coreRestClient.getClient();
-  coreClient.getProjects().then(
+  coreClient.getProjects(-1, 1500).then(
     function(projects) {
       if (projects !== undefined && projects.length > 0) {
         $("select.linkdialog-project-select")
