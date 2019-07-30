@@ -3,7 +3,11 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     Object.defineProperty(exports, "__esModule", { value: true });
     var ctx = null;
     function WriteLog(msg) {
-        console.log("Create-Child-Links: " + msg);
+        var optionalparams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            optionalparams[_i - 1] = arguments[_i];
+        }
+        console.log("Create-Child-Links: ", msg, optionalparams);
     }
     function ShowErrorMessage(message, title) {
         if (title === void 0) { title = "Une erreur est survenue"; }
@@ -201,50 +205,63 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
     }
     function AddRelationToCurrentWorkItem(newWIT, service, newWorkItemInfo, witClient, currentWorkItem) {
         if (service != null) {
-            service.addWorkItemRelations([
-                {
+            service.hasActiveWorkItem().then(function (hasActiveWorkItem) {
+                if (hasActiveWorkItem) {
+                    service.addWorkItemRelations([
+                        {
+                            rel: newWorkItemInfo.linkType,
+                            url: newWIT.url,
+                            attributes: {
+                                isLocked: false
+                            }
+                        }
+                    ]);
+                    service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
+                    service.save().then(function (response) {
+                        WriteLog(" Saved", response);
+                    }, function (error) {
+                        WriteLog(" Error saving: ", newWIT);
+                    });
+                }
+                else {
+                    AddRelationToCurrentWorkItemJSon(newWIT, service, newWorkItemInfo, witClient, currentWorkItem);
+                }
+            }, function (reason) {
+                WriteLog("Failed to get the current work item service:", reason);
+                AddRelationToCurrentWorkItemJSon(newWIT, service, newWorkItemInfo, witClient, currentWorkItem);
+            });
+        }
+    }
+    function AddRelationToCurrentWorkItemJSon(newWIT, service, newWorkItemInfo, witClient, currentWorkItem) {
+        var jsondoc = [
+            {
+                op: "add",
+                path: "/relations/-",
+                value: {
                     rel: newWorkItemInfo.linkType,
                     url: newWIT.url,
                     attributes: {
                         isLocked: false
                     }
                 }
-            ]);
-            service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
-            service.save().then(function (response) {
-                WriteLog(" Saved");
-            }, function (error) {
-                WriteLog(" Error saving: " + newWIT);
+            },
+            {
+                op: "add",
+                path: "/fields/System.History",
+                value: newWorkItemInfo["System.Comment"]
+            }
+        ];
+        witClient
+            .updateWorkItem(jsondoc, currentWorkItem.id)
+            .then(function (response) {
+            var a = response;
+            VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
+                navigationService.reload();
             });
-        }
-        else {
-            var jsondoc = [
-                {
-                    op: "add",
-                    path: "/relations/-",
-                    value: {
-                        rel: newWorkItemInfo.linkType,
-                        url: newWIT.url,
-                        attributes: {
-                            isLocked: false
-                        }
-                    }
-                },
-                {
-                    op: "add",
-                    path: "/fields/System.History",
-                    value: newWorkItemInfo["System.Comment"]
-                }
-            ];
-            witClient
-                .updateWorkItem(jsondoc, currentWorkItem.id)
-                .then(function (response) {
-                var a = response;
-                VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
-                    navigationService.reload();
-                });
-            });
-        }
+            WriteLog("Work item updated via JSON", response);
+        }, function (reason) {
+            WriteLog("Failed to save work item via json", reason);
+        });
     }
     function create(context, newWorkItemInfo) {
         var witClient = _WorkItemRestClient.getClient();
@@ -285,11 +302,13 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
             })
                 .then(function (teamAreaPath) {
                 workClient.getTeamSettings(targetTeam).then(function (targetTeamSettings) {
+                    var currentContextWorkItemId = context.workItemId !== undefined ? context.workItemId :
+                        context.id !== undefined ? context.id : context.workItemIds[0];
                     witClient
-                        .getWorkItem(context.workItemId)
+                        .getWorkItem(currentContextWorkItemId)
                         .then(function (currentWorkItem) {
                         var currentWorkItemFields = currentWorkItem.fields;
-                        currentWorkItemFields["System.Id"] = context.workItemId;
+                        currentWorkItemFields["System.Id"] = currentContextWorkItemId;
                         getWorkItemFormService().then(function (service) {
                             createWorkItem(service, currentWorkItem, currentWorkItemFields, teamSettings, targetTeam, targetTeamSettings, teamAreaPath, newWorkItemInfo);
                         });

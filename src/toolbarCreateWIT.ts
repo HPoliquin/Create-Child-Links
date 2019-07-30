@@ -30,8 +30,8 @@ interface TeamSettingInfo {
 
 var ctx: WebContext = null;
 
-function WriteLog(msg) {
-  console.log("Create-Child-Links: " + msg);
+function WriteLog(msg: any, ...optionalparams: any[]) {
+  console.log("Create-Child-Links: ", msg, optionalparams);
 }
 
 function ShowErrorMessage(message, title = "Une erreur est survenue") {
@@ -388,61 +388,90 @@ function AddRelationToCurrentWorkItem(
 ) {
   //Add relation
   if (service != null) {
-    service.addWorkItemRelations([
-      {
+    service.hasActiveWorkItem().then(function(hasActiveWorkItem: boolean) {
+      if(hasActiveWorkItem) {
+        service.addWorkItemRelations([
+          {
+            rel: newWorkItemInfo.linkType,
+            url: newWIT.url,
+            attributes: {
+              isLocked: false
+            }
+          }
+        ]);
+        service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
+        // service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
+        //Save
+        service.save().then(
+          function(response) {
+            WriteLog(" Saved", response);
+          },
+          function(error) {
+            WriteLog(" Error saving: ", newWIT);
+          }
+        );   
+
+      } else {
+        AddRelationToCurrentWorkItemJSon(newWIT,
+          service,
+          newWorkItemInfo,
+          witClient,
+          currentWorkItem);
+      }
+    }, function(reason:any) {
+      WriteLog("Failed to get the current work item service:", reason);
+      AddRelationToCurrentWorkItemJSon(newWIT,
+        service,
+        newWorkItemInfo,
+        witClient,
+        currentWorkItem);
+    });
+  } 
+}
+
+function AddRelationToCurrentWorkItemJSon(
+  newWIT: WorkItem,
+  service: _WorkItemServices.IWorkItemFormService,
+  newWorkItemInfo: any,
+  witClient: _WorkItemRestClient.WorkItemTrackingHttpClient4_1,
+  currentWorkItem: any
+) {
+  var jsondoc = [
+    {
+      op: "add",
+      path: "/relations/-",
+      value: {
         rel: newWorkItemInfo.linkType,
         url: newWIT.url,
         attributes: {
           isLocked: false
         }
       }
-    ]);
-    service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
-    // service.setFieldValue("System.Description", newWorkItemInfo["System.Description"]);
-    //Save
-    service.save().then(
-      function(response) {
-        WriteLog(" Saved");
-      },
-      function(error) {
-        WriteLog(" Error saving: " + newWIT);
-      }
-    );
-  } else {
-    var jsondoc = [
-      {
-        op: "add",
-        path: "/relations/-",
-        value: {
-          rel: newWorkItemInfo.linkType,
-          url: newWIT.url,
-          attributes: {
-            isLocked: false
-          }
-        }
-      },
-      {
-        op: "add",
-        path: "/fields/System.History",
-        value: newWorkItemInfo["System.Comment"]
-      }//,
-      // {
-      //   op: "add",
-      //   path: "/fields/System.Description",
-      //   value: newWorkItemInfo["System.Description"]
-      // }
-    ];
-    witClient
-      .updateWorkItem(jsondoc, currentWorkItem.id)
-      .then(function(response) {
-        var a = response;
-        VSS.getService(VSS.ServiceIds.Navigation).then(function(
-          navigationService: IHostNavigationService
-        ) {
-          navigationService.reload();
-        });
+    },
+    {
+      op: "add",
+      path: "/fields/System.History",
+      value: newWorkItemInfo["System.Comment"]
+    }//,
+    // {
+    //   op: "add",
+    //   path: "/fields/System.Description",
+    //   value: newWorkItemInfo["System.Description"]
+    // }
+  ];
+  witClient
+    .updateWorkItem(jsondoc, currentWorkItem.id)
+    .then(function(response) {
+      var a = response;
+      VSS.getService(VSS.ServiceIds.Navigation).then(function(
+        navigationService: IHostNavigationService
+      ) {
+        navigationService.reload();
       });
-  }
+      WriteLog("Work item updated via JSON", response);
+    }, function(reason) {
+      WriteLog("Failed to save work item via json", reason)
+    });
 }
 
 export function create(context, newWorkItemInfo) {
@@ -499,12 +528,15 @@ export function create(context, newWorkItemInfo) {
           workClient.getTeamSettings(targetTeam).then(
             function(targetTeamSettings) {
               // Get the current values for a few of the common fields
+              let currentContextWorkItemId = context.workItemId !== undefined ? context.workItemId : 
+                                              context.id !== undefined ? context.id : context.workItemIds[0];
+
               witClient
-                .getWorkItem(context.workItemId)
+                .getWorkItem(currentContextWorkItemId)
                 .then(function(currentWorkItem) {
                   var currentWorkItemFields = currentWorkItem.fields;
 
-                  currentWorkItemFields["System.Id"] = context.workItemId;
+                  currentWorkItemFields["System.Id"] = currentContextWorkItemId;
 
                   getWorkItemFormService().then(function(
                     service: _WorkItemServices.IWorkItemFormService
