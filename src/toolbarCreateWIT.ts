@@ -404,10 +404,10 @@ function AddRelationToCurrentWorkItem(
         //Save
         service.save().then(
           function(response) {
-            WriteLog(" Saved", response);
+            WriteLog(" Sauvegarde à partir du service: ", response);
           },
           function(error) {
-            WriteLog(" Error saving: ", newWIT);
+            WriteLog(" Erreur de sauvegarde: ", newWIT);
           }
         );   
 
