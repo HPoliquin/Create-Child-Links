@@ -254,10 +254,6 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
         witClient
             .updateWorkItem(jsondoc, currentWorkItem.id)
             .then(function (response) {
-            var a = response;
-            VSS.getService(VSS.ServiceIds.Navigation).then(function (navigationService) {
-                navigationService.reload();
-            });
             WriteLog("Work item updated via JSON", response);
         }, function (reason) {
             WriteLog("Failed to save work item via json", reason);

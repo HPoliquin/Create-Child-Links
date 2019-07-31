@@ -459,10 +459,10 @@ function AddRelationToCurrentWorkItemJSon(
     //   value: newWorkItemInfo["System.Description"]
     // }
   ];
+
   witClient
     .updateWorkItem(jsondoc, currentWorkItem.id)
     .then(function(response) {
-      var a = response;
       VSS.getService(VSS.ServiceIds.Navigation).then(function(
         navigationService: IHostNavigationService
       ) {
