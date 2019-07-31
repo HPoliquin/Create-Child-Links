@@ -331,5 +331,8 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-# TS Cache
-.tscache/
+# Grunt
+.tscache
+**/Tests/Selenium/*.tests.js
+**/Tests/Selenium/*.tests.d.ts
+**/Tests/Selenium/*.tests.js.map
