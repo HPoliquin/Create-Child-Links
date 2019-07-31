@@ -19,9 +19,9 @@ var container = $(".widget-configuration");
 var waitControlOptions = {
   target: $("#target"),
   cancellable: true,
-  cancelTextFormat: "{0} to cancel",
+  cancelTextFormat: "{0} pour annuler",
   cancelCallback: function() {
-    console.log("cancelled");
+    console.log("cancelled operation.");
   }
 };
 

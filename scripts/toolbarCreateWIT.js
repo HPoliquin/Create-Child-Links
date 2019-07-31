@@ -218,9 +218,9 @@ define(["require", "exports", "TFS/WorkItemTracking/Services", "TFS/WorkItemTrac
                     ]);
                     service.setFieldValue("System.History", newWorkItemInfo["System.Comment"]);
                     service.save().then(function (response) {
-                        WriteLog(" Saved", response);
+                        WriteLog(" Sauvegarde à partir du service: ", response);
                     }, function (error) {
-                        WriteLog(" Error saving: ", newWIT);
+                        WriteLog(" Erreur de sauvegarde: ", newWIT);
                     });
                 }
                 else {

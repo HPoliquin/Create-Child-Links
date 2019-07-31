@@ -2,9 +2,9 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.2.92",
-    "name": "Create Child links",
-    "description": "Create child link defined by templates",
+    "version": "0.2.98",
+    "name": "Creation de demandes de soutien",
+    "description": "Creation de demandes de soutien, par template, dans une équipe ciblée",
     "public": false,
     "targets": [
         {
@@ -39,7 +39,7 @@
                 "ms.vss-work-web.backlog-item-menu"
             ],
             "properties": {
-                "name": "Create Child Links",
+                "name": "Créer une demande de soutien",
                 "uri": "static/toolbar.html",
                 "text": "Créer une demande de soutien",
                 "title": "Créer une demande de soutien",

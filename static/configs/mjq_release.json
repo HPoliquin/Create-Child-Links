@@ -1,6 +1,6 @@
 {
     "id": "vsts-suivis-dsd",
-    "name": "Creer suivis DSD",
+    "name": "Creation de demandes de soutien",
     "publisher": "MJQ",
     "description": "Créer une demande de soutien",
     "categories": [
