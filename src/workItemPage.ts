@@ -108,8 +108,23 @@ function getFormData() {
   };
 }
 
+function teamAllowed(projectName: string, teamName: string) {
+  if(projectName == "DSD")
+  {
+    return teamName == "Administration des bases de données";
+  }
+  else if(projectName == "DSD - Soutien au développement")
+  {
+    return teamName == "DSD - Soutien au développement";
+  } else {
+    return true;
+  }
+
+}
+
 function isProjectIncluded(aProject) {
-  return projectList.includes(aProject.id);
+  //return projectList.includes(aProject.id);
+  return projectList.indexOf(aProject.id) > -1;
 }
 
 function getProjects() {
@@ -172,12 +187,15 @@ function getTeams(targetProjectId) {
               .val("");
 
             teams.forEach(function(team) {
-              $("select.linkdialog-team-select").append(
-                $("<option>", {
-                  value: team.id,
-                  text: team.name
-                })
-              );
+              if(teamAllowed(project.name, team.name))
+              {
+                $("select.linkdialog-team-select").append(
+                  $("<option>", {
+                    value: team.id,
+                    text: team.name
+                  })
+                );
+              }
             });
           },
           function(reason) {
