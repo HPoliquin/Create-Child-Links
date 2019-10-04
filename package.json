@@ -17,6 +17,7 @@
     "@types/jquery": "^2.0.53",
     "@types/q": "0.0.32",
     "bluebird": "^3.5.5",
+    "materialize-css": "^1.0.0-rc.2",
     "requirejs": "^2.3.6",
     "vss-web-extension-sdk": "^5.141.0"
   },

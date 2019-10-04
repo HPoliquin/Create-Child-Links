@@ -109,7 +109,7 @@ function getFormData() {
 }
 
 function teamAllowed(projectName: string, teamName: string) {
-  if(projectName == "DSD")
+  if(projectName == "DSD - Administration des bases de données")
   {
     return teamName == "Administration des bases de données";
   }

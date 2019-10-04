@@ -25,7 +25,7 @@ export function configurationActionHandler(context) {
         // Show dialog
         var dialogOptions = {
           title: "Configuration de demande de soutien",
-          width: 800,
+          width: 1200,
           height: 450,
 
           getDialogResult: function() {

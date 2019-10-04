@@ -85,6 +85,16 @@ function projectIncludedChanged() {
   }
 }
 
+function projectIncludedSelected() {
+  let project = $("select.linkdialog-project-included-select").val();
+
+  // Execute registered callbacks
+  for (var i = 0; i < callbacks.length; i++) {
+    callbacks[i](isValid());
+  }
+  
+}
+
 function isValid() {
   return $("select.linkdialog-project-included-select option").length > 0;
 }
@@ -96,7 +106,6 @@ function getFormData() {
     let option : IProjectInfo = {
       project : $(this).text(),
       projectId : $(this).val()
-
     }
     ProjectSelected.push(option);
   });
@@ -162,6 +171,13 @@ function getProjects() {
           .end()
           .val("");
 
+        $("select.linkdialog-project-team-included-select")
+          .find("option")
+          .remove()
+          .end()
+          .val("");
+
+
         projects.sort(function(project1, project2) {
           return project2.name.toUpperCase() < project1.name.toUpperCase() ? 1 : -1;
         })
@@ -226,6 +242,11 @@ export function ConfigurationPageHandler(context) {
       $("select.linkdialog-project-included-select").on(
         "change",
         projectIncludedChanged
+      );
+
+      $("select.linkdialog-project-included-select").on(
+        "select",
+        projectIncludedSelected
       );
 
       $("button.btn-add").on("click", onAddedClick);

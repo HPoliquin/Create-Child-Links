@@ -39,8 +39,18 @@
                     expand: true, 
                     flatten: true, 
                     src: ["node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js", 
-                          "node_modules/bluebird/js/browser/bluebird.min.js"], 
+                          "node_modules/bluebird/js/browser/bluebird.min.js",
+                          "node_modules/materialize-css/dist/js/materialize.min.js"], 
                     dest: "lib",
+                    filter: "isFile" 
+                }]
+            },
+            css: {
+                files: [{
+                    expand: true, 
+                    flatten: true, 
+                    src: ["node_modules/materialize-css/dist/css/materialize.min.css"], 
+                    dest: "css",
                     filter: "isFile" 
                 }]
             }
