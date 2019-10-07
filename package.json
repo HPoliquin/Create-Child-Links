@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/jquery": "^2.0.53",
+    "@types/materialize-css": "^1.0.6",
     "@types/q": "0.0.32",
     "bluebird": "^3.5.5",
     "materialize-css": "^1.0.0-rc.2",

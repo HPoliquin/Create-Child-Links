@@ -26,7 +26,7 @@ export function configurationActionHandler(context) {
         var dialogOptions = {
           title: "Configuration de demande de soutien",
           width: 1200,
-          height: 450,
+          height: 550,
 
           getDialogResult: function() {
             // Get the result from registrationForm object
