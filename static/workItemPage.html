@@ -4,10 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>Creation demande de soutien</title>
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="../css/materialize.min.css"  media="screen,projection"/>
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 
 <body>
   <script src="../lib/VSS.SDK.min.js"></script>
+  <script src="../lib/materialize.min.js"></script>
 
   <script>
     VSS.init({
@@ -29,25 +35,25 @@
 
         // // Register a listener for the work item group contribution.
         VSS.register("create-child-links-work-item-form-page", workItemPage.workItemFormPageHandler);
-
+        M.AutoInit();
         VSS.notifyLoadSucceeded();
       }
     );
   </script>
 
   <style>
-    .column {
+    /* .column {
       float: left;
       width: 45%;
       padding: 5px;
-    }
+    } */
 
     /* Clear floats after the columns */
-    .row:after {
+    /* .row:after {
       content: "";
       display: table;
       clear: both;
-    }
+    } */
   </style>
 
   <div class="widget-configuration">
@@ -64,40 +70,40 @@
           <div class="dialog modal-dialog link-dialog" style="width: 95%;">
 
             <div class="row">
-              <div class="column">
+              <div class="col s6">
                 <div class="dropdown">
-                  <label>Projet</label>
-                  <div class="wrapper">
+                  <label>Équipe</label>
+                  <div class="input-field">
                     <select class="linkdialog-project-select"></select>
                   </div>
                 </div>
               </div>
 
-              <div class="column">
+              <!-- <div class="col s6">
                 <div class="dropdown">
                   <label>Équipe</label>
                   <div class="wrapper">
                     <select class="linkdialog-team-select"></select>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
 
 
 
             <div class="row">
-              <div class="column">
+              <div class="col s6">
                 <div class="dropdown">
                   <label>Type de lien</label>
-                  <div class="wrapper">
+                  <div class="input-field">
                     <select class="linkdialog-linktype-select"></select>
                   </div>
                 </div>
               </div>
-              <div class="column">
+              <div class="col s6">
                 <div class="dropdown">
                   <label>Type d'élément de travail</label>
-                  <div class="wrapper">
+                  <div class="input-field">
                     <select class="linkdialog-wittype-select"></select>
                   </div>
                 </div>

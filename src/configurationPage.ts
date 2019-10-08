@@ -124,7 +124,7 @@ function projectIncludedChanged() {
 
 
 function isValid() {
-  return $("select.linkdialog-project-included-select option").length > 0;
+  return $("select.linkdialog-project-included-select").find("option").length > 0;
 }
 
 function getFormData() {
@@ -180,9 +180,9 @@ function isProjectTeamIncluded(aTeam: string) {
 
   for( var i = 0; i < teamList.length; i++){
     if ( teamList[i] === aTeam) {
-            teamFound = true;
-            break;
-          }
+      teamFound = true;
+      break;
+    }
   }
 
   return teamFound;  
@@ -215,6 +215,22 @@ function addProjectTeam(team: ITeamInfo) {
   }
 }
 
+var selectTeamInstance;
+function refreshTeamsSelect() 
+{
+  var elems = document.querySelector('select.linkdialog-project-team-included-select');
+  selectTeamInstance = M.FormSelect.init(elems);
+  // var elems = document.querySelectorAll('select');
+  // var options = document.querySelectorAll('option');
+  // var instances = M.FormSelect.init(elems, options); //M.FormSelect.init(elems, options);
+  // if(selectTeamInstance === undefined)
+  // {
+  //   selectTeamInstance = M.FormSelect.init(elems);    
+  // } else {
+  //   selectTeamInstance = M.FormSelect.getInstance(elems);
+  // }
+}
+
 function onAddedClick() {
     $.each($("select.linkdialog-project-select option:selected"), function() {
         $("select.linkdialog-project-included-select").append($("<option>", {
@@ -233,8 +249,7 @@ function onAddedClick() {
         getTeams(projectDef);
     });
 
-    var elems = document.querySelectorAll('select');
-    var instances = M.FormSelect.init(elems);
+    
 
     $("select.linkdialog-project-select").find("option:selected").remove()
     .end()
@@ -260,12 +275,11 @@ function onRemovedClick() {
        }
     });
 
+    refreshTeamsSelect();
+
     $("select.linkdialog-project-included-select").find("option:selected").remove()
     .end()
     .val("");
-
-    var elems = document.querySelectorAll('select');
-    var instances = M.FormSelect.init(elems);
 
     projectChanged();
     projectIncludedChanged();
@@ -283,11 +297,10 @@ function getTeams(project: IProjectInfo)
         $("select.linkdialog-project-team-included-select")
           .find("optgroup[label='" + project.project + "'] option")
           .remove()
-          .end()
-          .val("");
+          .end();
 
           teams.forEach(function(team) {
-            console.log("Team trouvé : ", team.id, team.name);
+            // console.log("Team trouvé : ", team.id, team.name);
             if (isProjectTeamIncluded(team.id)) {
               $("select.linkdialog-project-team-included-select").find("optgroup[label='" + project.project + "']").append(
                 $("<option>", {
@@ -306,9 +319,7 @@ function getTeams(project: IProjectInfo)
             }
           });
       }
-
-      var elems = document.querySelectorAll('select');
-      var instances = M.FormSelect.init(elems);
+      refreshTeamsSelect();
       waitControl.endWait();
     }, 
     function(reason) {
@@ -340,7 +351,7 @@ function getProjects() {
           .val("");
 
         $("select.linkdialog-project-team-included-select")
-          .find("option")
+          .find("optgroup")
           .remove()
           .end()
           .val("");
@@ -375,6 +386,7 @@ function getProjects() {
           }
         });
       }
+
       waitControl.endWait();
     },
     function(reason) {

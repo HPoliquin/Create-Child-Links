@@ -1,4 +1,5 @@
 ///<reference types="vss-web-extension-sdk" />
+///<reference types="materialize-css"/>
 
 import * as _VSSServices from "VSS/Service";
 import * as _WidgetHelpers from "TFS/Dashboards/WidgetHelpers";
@@ -9,9 +10,19 @@ import * as _coreRestClient from "TFS/Core/RestClient";
 import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 
+interface IConfigurationInfo {
+  projects: IProjectInfo[],
+  teams: string[]
+}
+
 interface IProjectInfo {
   project: string;
   projectId: string;
+}
+
+interface ITeamInfo {
+  team: string;
+  teamId: string;
 }
 
 var container = $(".widget-configuration");
@@ -48,7 +59,8 @@ function getWorkItemFormService() {
 
 var callbacks = [];
 
-var projectList = [];
+var projectList:IProjectInfo[] = [];
+var teamList = [];
 
 function inputChanged() {
   // Execute registered callbacks
@@ -58,10 +70,10 @@ function inputChanged() {
 }
 
 function projectChanged() {
-  let project = $("select.linkdialog-project-select").val();
-  if (project !== undefined && project !== null && project.length > 0) {
-    getTeams(project);
-  }
+  // let project = $("select.linkdialog-project-select").val();
+  // if (project !== undefined && project !== null && project.length > 0) {
+  //   getTeams(project);
+  // }
   // Execute registered callbacks
   for (var i = 0; i < callbacks.length; i++) {
     callbacks[i](isValid());
@@ -74,7 +86,7 @@ function isValid() {
     "selectedIndex"
   );
 
-  let teamIndex = $("select.linkdialog-team-select").prop("selectedIndex");
+  // let teamIndex = $("select.linkdialog-team-select").prop("selectedIndex");
 
   let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
     "selectedIndex"
@@ -86,7 +98,7 @@ function isValid() {
 
   return (
     projectIndex > 0 &&
-    teamIndex > 0 &&
+    // teamIndex > 0 &&
     linkTypeIndex >= 0 &&
     wittTpeIndex >= 0 &&
     titreLength > 0
@@ -101,30 +113,56 @@ function getFormData() {
     "System.Title": $("input#dialog-label").val(),
     "System.Comment": $("textarea#comment").val(),
     "System.Description": $("textarea#description").val(),
-    Project: $("select.linkdialog-project-select option:selected").text(),
-    ProjectId: $("select.linkdialog-project-select option:selected").val(),
-    Team: $("select.linkdialog-team-select option:selected").text(),
-    TeamId: $("select.linkdialog-team-select").val()
+    Project: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("label"),
+    ProjectId: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("value"),
+    Team: $("select.linkdialog-project-select option:selected").text(),
+    TeamId: $("select.linkdialog-project-select option:selected").val()
   };
-}
 
-function teamAllowed(projectName: string, teamName: string) {
-  if(projectName == "DSD - Administration des bases de données")
-  {
-    return teamName == "Administration des bases de données";
-  }
-  else if(projectName == "DSD - Soutien au développement")
-  {
-    return teamName == "DSD - Soutien au développement";
-  } else {
-    return true;
-  }
+  // Project: $("select.linkdialog-project-select option:selected").text(),
+  // ProjectId: $("select.linkdialog-project-select option:selected").val(),
 
 }
 
-function isProjectIncluded(aProject) {
-  //return projectList.includes(aProject.id);
-  return projectList.indexOf(aProject.id) > -1;
+function teamAllowed(aTeam: string) {
+  let teamFound = false;
+
+  for( var i = 0; i < teamList.length; i++){
+    if ( teamList[i] === aTeam) {
+      teamFound = true;
+      break;
+    }
+  }
+
+  return teamFound;  
+}
+
+// function teamAllowed(projectName: string, teamName: string) {
+  // if(projectName == "DSD - Administration des bases de données")
+  // {
+  //   return teamName == "Administration des bases de données";
+  // }
+  // else if(projectName == "DSD - Soutien au développement")
+  // {
+  //   return teamName == "DSD - Soutien au développement";
+  // } else {
+  //   return true;
+  // }
+
+//}
+
+function isProjectIncluded(aProject: string) {
+  let projectFound = false;
+  for( var i = 0; i < projectList.length; i++){ 
+    if ( projectList[i].projectId === aProject) {
+      projectFound = true;
+      break;
+    }
+  }
+
+  return projectFound;  
+  // return projectList.includes(aProject.id);
+  // return projectList.indexOf(aProject.id) > -1;
 }
 
 function getProjects() {
@@ -136,7 +174,7 @@ function getProjects() {
     function(projects) {
       if (projects !== undefined && projects.length > 0) {
         $("select.linkdialog-project-select")
-          .find("option")
+          .find("optgroup")
           .remove()
           .end()
           .append("<option>Choisir le projet</option>")
@@ -147,19 +185,27 @@ function getProjects() {
         })
 
         projects.forEach(function(project) {
-          if (isProjectIncluded(project)) {
-            $("select.linkdialog-project-select").append(
-              $("<option>", {
-                value: project.id,
-                text: project.name
-              })
-            );
+          if (isProjectIncluded(project.id)) {
+            $("select.linkdialog-project-select").append($("<optgroup>", {
+              disabled: "disabled",
+              value: project.id,
+              label: project.name
+            }));
+            let _projectInfo: IProjectInfo = {project: project.name, projectId: project.id};
+            getTeams(_projectInfo);
+            // $("select.linkdialog-project-select").append(
+            //   $("<option>", {
+            //     value: project.id,
+            //     text: project.name
+            //   })
+            // );
           }
         });
       }
       waitControl.endWait();
     },
     function(reason) {
+      console.log(reason);
       waitControl.endWait();
     }
   );
@@ -179,17 +225,22 @@ function getTeams(targetProjectId) {
       function(project) {
         coreClient.getTeams(project.id).then(
           function(teams) {
-            $("select.linkdialog-team-select")
-              .find("option")
+            $("select.linkdialog-project-select")
+              .find("optgroup[label='" + project.name + "'] option")
               .remove()
-              .end()
-              .append("<option>Choisir l'équipe</option>")
-              .val("");
+              .end();
+
+            // $("select.linkdialog-team-select")
+            //   .find("option")
+            //   .remove()
+            //   .end()
+            //   .append("<option>Choisir l'équipe</option>")
+            //   .val("");
 
             teams.forEach(function(team) {
-              if(teamAllowed(project.name, team.name))
+              if(teamAllowed(team.id))
               {
-                $("select.linkdialog-team-select").append(
+                $("select.linkdialog-project-select").find("optgroup[label='" + project.name + "']").append(
                   $("<option>", {
                     value: team.id,
                     text: team.name
@@ -199,11 +250,10 @@ function getTeams(targetProjectId) {
             });
           },
           function(reason) {
-            $("select.linkdialog-team-select")
-              .find("option")
+            $("select.linkdialog-project-select")
+              .find("optgroup[label='" + project.name + "'] option")
               .remove()
               .end()
-              .append("<option>Aucune équipe disponnible</option>")
               .val("");
           }
         );
@@ -279,11 +329,18 @@ export function workItemFormPageHandler(context) {
         dataService.getValue("projectIncluded").then(function(value: string) {
           if(value !== undefined) {
             let myProjectList = JSON.parse(value);
-            $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
-              $.each(value, function(index, elementValue) {
-                projectList.push(elementValue.projectId)
-              });
+            $.each(myProjectList, function(key:string, value: IConfigurationInfo) {
+              // $.each(value, function(index, elementValue) {
+                projectList = value.projects===undefined? [] : value.projects;
+                teamList = value.teams===undefined? [] : value.teams;
+              // });
             });
+
+            // $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
+            //   $.each(value, function(index, elementValue) {
+            //     projectList.push(elementValue.projectId)
+            //   });
+            // });
             getProjects();
           } else {
             getProjects();
@@ -307,6 +364,7 @@ export function workItemFormPageHandler(context) {
           ) {
             $("select.linkdialog-linktype-select").append(
               $("<option>", {
+                selected: true,
                 value: element.referenceName,
                 text: element.name
               })
@@ -317,7 +375,7 @@ export function workItemFormPageHandler(context) {
 
       $("select.linkdialog-project-select").on("change", projectChanged);
 
-      $("select.linkdialog-team-select").on("change", inputChanged);
+      // $("select.linkdialog-team-select").on("change", inputChanged);
 
       $("select.linkdialog-linktype-select").on("change", inputChanged);
 
