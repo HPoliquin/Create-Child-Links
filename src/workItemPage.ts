@@ -99,6 +99,9 @@ function projectChanged() {
 }
 
 function isValid() {
+  refreshTeamsSelect();
+  refreshWITCategory();
+  refreshWITTypesSelect();
   // Check whether form is valid or not
   let projectIndex = $("select.linkdialog-project-select").prop(
     "selectedIndex"

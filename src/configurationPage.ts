@@ -124,7 +124,10 @@ function projectIncludedChanged() {
 
 
 function isValid() {
-  return $("select.linkdialog-project-included-select").find("option").length > 0;
+  let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
+  teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues();
+
+  return projectList.length > 0 && teamList.length > 0;
 }
 
 function getFormData() {
