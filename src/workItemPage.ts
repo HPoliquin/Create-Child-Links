@@ -70,10 +70,28 @@ function inputChanged() {
 }
 
 function projectChanged() {
-  // let project = $("select.linkdialog-project-select").val();
-  // if (project !== undefined && project !== null && project.length > 0) {
-  //   getTeams(project);
-  // }
+  let teamSelect = document.querySelector("select.linkdialog-project-select");
+  let selectTeamInstance = M.FormSelect.init(teamSelect);
+  teamList = selectTeamInstance.getSelectedValues();
+
+  if(teamList.length >0 && teamList[0] !== "Choisir une équipe")
+  {
+    let teamID = teamList[0];
+    let projectID = $("select.linkdialog-project-select option[value='" + teamID + "']").parent().attr("value");
+
+    getWITType(projectID, teamID);
+  } 
+  else 
+  {
+    $("select.linkdialog-wittype-select")
+            .find("option")
+            .remove()
+            .end()
+            .val("");
+    refreshWITTypesSelect();
+  }
+  
+
   // Execute registered callbacks
   for (var i = 0; i < callbacks.length; i++) {
     callbacks[i](isValid());
@@ -86,8 +104,6 @@ function isValid() {
     "selectedIndex"
   );
 
-  // let teamIndex = $("select.linkdialog-team-select").prop("selectedIndex");
-
   let linkTypeIndex = $("select.linkdialog-linktype-select").prop(
     "selectedIndex"
   );
@@ -98,11 +114,28 @@ function isValid() {
 
   return (
     projectIndex > 0 &&
-    // teamIndex > 0 &&
     linkTypeIndex >= 0 &&
     wittTpeIndex >= 0 &&
     titreLength > 0
-  ); //confirm("Est-ce Valid?");//!!(name.value) && !!(dateOfBirth.value) && !!(email.value);
+  );
+}
+
+function refreshTeamsSelect() 
+{
+  var elems = document.querySelector('select.linkdialog-project-select');
+  let selectTeamInstance = M.FormSelect.init(elems);
+}
+
+function refreshWITTypesSelect()
+{
+  var elems = document.querySelector('select.linkdialog-wittype-select');
+  let selectWITInstance = M.FormSelect.init(elems);
+}
+
+function refreshWITCategory()
+{
+  var elems = document.querySelector('select.linkdialog-linktype-select');
+  let selectWITCategoryInstance = M.FormSelect.init(elems);
 }
 
 function getFormData() {
@@ -119,9 +152,6 @@ function getFormData() {
     TeamId: $("select.linkdialog-project-select option:selected").val()
   };
 
-  // Project: $("select.linkdialog-project-select option:selected").text(),
-  // ProjectId: $("select.linkdialog-project-select option:selected").val(),
-
 }
 
 function teamAllowed(aTeam: string) {
@@ -137,19 +167,6 @@ function teamAllowed(aTeam: string) {
   return teamFound;  
 }
 
-// function teamAllowed(projectName: string, teamName: string) {
-  // if(projectName == "DSD - Administration des bases de données")
-  // {
-  //   return teamName == "Administration des bases de données";
-  // }
-  // else if(projectName == "DSD - Soutien au développement")
-  // {
-  //   return teamName == "DSD - Soutien au développement";
-  // } else {
-  //   return true;
-  // }
-
-//}
 
 function isProjectIncluded(aProject: string) {
   let projectFound = false;
@@ -161,8 +178,6 @@ function isProjectIncluded(aProject: string) {
   }
 
   return projectFound;  
-  // return projectList.includes(aProject.id);
-  // return projectList.indexOf(aProject.id) > -1;
 }
 
 function getProjects() {
@@ -177,7 +192,7 @@ function getProjects() {
           .find("optgroup")
           .remove()
           .end()
-          .append("<option>Choisir le projet</option>")
+          .append('<option value="Choisir une équipe" selected>Choisir une équipe</option>')
           .val("");
 
         projects.sort(function(project1, project2) {
@@ -193,12 +208,6 @@ function getProjects() {
             }));
             let _projectInfo: IProjectInfo = {project: project.name, projectId: project.id};
             getTeams(_projectInfo);
-            // $("select.linkdialog-project-select").append(
-            //   $("<option>", {
-            //     value: project.id,
-            //     text: project.name
-            //   })
-            // );
           }
         });
       }
@@ -211,17 +220,85 @@ function getProjects() {
   );
 }
 
-function getTeams(targetProjectId) {
+function getWITType(projectID: string, teamID: string)
+{
+  if(teamID !== undefined && teamID.length >0)
+  {
+    waitControl.startWait();
+
+    $("select.linkdialog-wittype-select")
+            .find("option")
+            .remove()
+            .end()
+            .val("");
+
+    let client = _WorkItemRestClient.getClient();
+    let coreClient = _coreRestClient.getClient();
+    coreClient.getTeam(projectID, teamID).then(function(team) {
+
+    });
+
+
+    client.getWorkItemTypeCategories(projectID).then(
+      function(witCategories) {
+        var category = undefined;
+        for (let i = 0; i < witCategories.length; i++) {
+          if (
+            witCategories[i].referenceName ==
+            "Microsoft.RequirementCategory"
+          ) {
+            category = witCategories[i];
+            break;
+          }
+        }
+
+        let witTypeAdded = 0;
+        if (category != undefined || category.workItemTypes.length == 0) {
+          
+
+          category.workItemTypes.forEach(function(wit) {
+            witTypeAdded++;
+            $("select.linkdialog-wittype-select").append(
+              $("<option>", {
+                value: wit.name,
+                text: wit.name
+              })
+            );
+          });
+        }
+        if (witTypeAdded == 0) {
+          client.getWorkItemTypes(projectID).then(function(witTypes) {
+            witTypes.forEach(function(element) {
+              if (element.isDisabled === false) {
+                $("select.linkdialog-wittype-select").append(
+                  $("<option>", {
+                    value: element.name,
+                    text: element.name
+                  })
+                );
+              }
+            });
+          });
+        }
+        refreshWITTypesSelect();
+        waitControl.endWait();
+      },
+      function(reason) {
+        refreshWITTypesSelect();
+        waitControl.endWait();
+      }
+    );
+  }
+}
+
+function getTeams(targetProject: IProjectInfo) {
   if (
-    targetProjectId !== undefined &&
-    targetProjectId.length > 0 &&
-    targetProjectId !== "Choisir le projet"
+    targetProject !== undefined
   ) {
     waitControl.startWait();
     let client = _WorkItemRestClient.getClient();
-    //var targetProjectId = "DSD";
     let coreClient = _coreRestClient.getClient();
-    coreClient.getProject(targetProjectId).then(
+    coreClient.getProject(targetProject.projectId).then(
       function(project) {
         coreClient.getTeams(project.id).then(
           function(teams) {
@@ -229,13 +306,6 @@ function getTeams(targetProjectId) {
               .find("optgroup[label='" + project.name + "'] option")
               .remove()
               .end();
-
-            // $("select.linkdialog-team-select")
-            //   .find("option")
-            //   .remove()
-            //   .end()
-            //   .append("<option>Choisir l'équipe</option>")
-            //   .val("");
 
             teams.forEach(function(team) {
               if(teamAllowed(team.id))
@@ -248,6 +318,8 @@ function getTeams(targetProjectId) {
                 );
               }
             });
+            refreshTeamsSelect();
+            waitControl.endWait();
           },
           function(reason) {
             $("select.linkdialog-project-select")
@@ -255,58 +327,7 @@ function getTeams(targetProjectId) {
               .remove()
               .end()
               .val("");
-          }
-        );
-
-        client.getWorkItemTypeCategories(project.id).then(
-          function(witCategories) {
-            var category = undefined;
-            for (let i = 0; i < witCategories.length; i++) {
-              if (
-                witCategories[i].referenceName ==
-                "Microsoft.RequirementCategory"
-              ) {
-                category = witCategories[i];
-                break;
-              }
-            }
-
-            // var category = witCategories.find(function(category) { category.referenceName == "Microsoft.RequirementCategory"});
-            let witTypeAdded = 0;
-            if (category != undefined || category.workItemTypes.length == 0) {
-              $("select.linkdialog-wittype-select")
-                .find("option")
-                .remove()
-                .end()
-                .val("");
-
-              category.workItemTypes.forEach(function(wit) {
-                witTypeAdded++;
-                $("select.linkdialog-wittype-select").append(
-                  $("<option>", {
-                    value: wit.name,
-                    text: wit.name
-                  })
-                );
-              });
-            }
-            if (witTypeAdded == 0) {
-              client.getWorkItemTypes(project.id).then(function(witTypes) {
-                witTypes.forEach(function(element) {
-                  if (element.isDisabled === false) {
-                    $("select.linkdialog-wittype-select").append(
-                      $("<option>", {
-                        value: element.name,
-                        text: element.name
-                      })
-                    );
-                  }
-                });
-              });
-            }
-            waitControl.endWait();
-          },
-          function(reason) {
+            refreshTeamsSelect();
             waitControl.endWait();
           }
         );
@@ -336,11 +357,6 @@ export function workItemFormPageHandler(context) {
               // });
             });
 
-            // $.each(myProjectList, function(key:string, value: [IProjectInfo]) {
-            //   $.each(value, function(index, elementValue) {
-            //     projectList.push(elementValue.projectId)
-            //   });
-            // });
             getProjects();
           } else {
             getProjects();
@@ -371,6 +387,7 @@ export function workItemFormPageHandler(context) {
             );
           }
         });
+        refreshWITCategory();
       });
 
       $("select.linkdialog-project-select").on("change", projectChanged);
@@ -411,22 +428,3 @@ export function workItemFormPageHandler(context) {
     }
   };
 }
-
-// // that currently is displayed in the UI).
-// function getWorkItemFormService()
-// {
-//     return _WorkItemServices.WorkItemFormService.getService();
-// }
-
-// $("#name").text(VSS.getWebContext().user.name);
-// $("div.title div.la-user-icon").text(VSS.getWebContext().user.name + " <" + VSS.getWebContext().user.uniqueName + ">");
-
-// getWorkItemFormService().then(function(service) {
-//     service.getFieldValues(["System.Id", "System.Title", "System.ChangedDate", "System.State", "System.WorkItemType"]).then(function(myFields) {
-//         $("div.title div.la-primary-data-id").text(myFields["System.Id"]);
-//         $("div.title div.la-primary-data-title").text(myFields["System.Title"]);
-//         $("div.title span.la-primary-data-modified").text("Mise à jour de " + new Date(myFields["System.ChangedDate"]).toLocaleDateString());
-//         $("div.title span.la-primary-data-state").text(myFields["System.State"]);
-//         $("div.title div.la-primary-data-title").html(myFields["System.WorkItemType"]);
-//     });
-// });

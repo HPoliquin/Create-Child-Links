@@ -33,7 +33,7 @@ export function toolbarActionHandler(context) {
         let dialogOptions = {
           title: "Créer une demande de soutien",
           width: 1000,
-          height: 600,
+          height: 700,
 
           getDialogResult: function() {
             // Get the result from registrationForm object

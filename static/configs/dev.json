@@ -1,6 +1,8 @@
 {
     "id": "vsts-work-item-create-child-links-dev",
+    "publisher": "Cofomo-HenrickPoliquin",
     "name": "Creation de demandes de soutien",
+    "description": "Créer une demande de soutien",
     "categories": ["Azure Repos"],
     "public": false
 }
