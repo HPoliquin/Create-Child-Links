@@ -13,7 +13,7 @@ import {
   WorkItemTypeCategory,
   WorkItem
 } from "TFS/WorkItemTracking/Contracts";
-import { FieldType, TeamSetting, TeamFieldValues } from "TFS/Work/Contracts";
+import { FieldType, TeamSetting, TeamFieldValues, BacklogConfiguration } from "TFS/Work/Contracts";
 import { buttonKeydownHandler } from "VSS/Utils/UI";
 import {
   TeamProject,
@@ -180,56 +180,66 @@ function createWorkItem(
 
     // if template has no AreaPath field copies value from parent
     //if (taskTemplate.fieldInstances.find(f => { return f.referenceName == "System.AreaPath"; }) != undefined)
-    {
+    // {
       workItem.push({
         op: "add",
         path: "/fields/System.AreaPath",
         value: teamAreaPath
       });
-    }
+    // }
+
+    workItem.push({
+        op: "add",
+        path: "/fields/System.IterationPath",
+        value: newWorkItemInfo["System.IterationPath"]
+    });
+
+    console.log(" newWorkItemInfo[System.IterationPath]", newWorkItemInfo);
+
+
 
     // if template has no IterationPath field copies value from parent
     // check if IterationPath field value is @currentiteration
     // if (taskTemplate.fields['System.IterationPath'] == null)
     //     workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": currentWorkItem['System.IterationPath'] })
     // else if (taskTemplate.fields['System.IterationPath'].toLowerCase() == '@currentiteration')
-    workItem.push({
-      op: "add",
-      path: "/fields/System.IterationPath",
-      value:
-        teamSettings.backlogIteration.name + teamSettings.defaultIteration.path
-    });
+    // workItem.push({
+    //   op: "add",
+    //   path: "/fields/System.IterationPath",
+    //   value:
+    //     teamSettings.backlogIteration.name + teamSettings.defaultIteration.path
+    // });
     //workItem.push({ "op": "add", "path": "/fields/System.IterationPath", "value": teamSettings.backlogIteration.name })
 
-    var myCustomApplicationField = undefined;
-    for (let i=0; i< taskTemplate.fieldInstances.length; i++) {
-      if(taskTemplate.fieldInstances[i].referenceName == "Custom.Application") {
-        myCustomApplicationField = taskTemplate.fieldInstances[i];
-        break;
-      }
-    }
+    // var myCustomApplicationField = undefined;
+    // for (let i=0; i< taskTemplate.fieldInstances.length; i++) {
+    //   if(taskTemplate.fieldInstances[i].referenceName == "Custom.Application") {
+    //     myCustomApplicationField = taskTemplate.fieldInstances[i];
+    //     break;
+    //   }
+    // }
 
-    if (
-      taskTemplate != undefined && myCustomApplicationField != undefined
-      // taskTemplate.fieldInstances.find(f => {
-      //   return f.referenceName == "Custom.Application";
-      // }) != undefined
-    ) {
-      if (currentWorkItem["Custom.Application"] != undefined) {
-        // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
-        workItem.push({
-          op: "add",
-          path: "/fields/Custom.Application",
-          value: currentWorkItem["Custom.Application"]
-        });
-      } else {
-        workItem.push({
-          op: "add",
-          path: "/fields/Custom.Application",
-          value: ctx.project.name
-        });
-      }
-    } 
+    // if (
+    //   taskTemplate != undefined && myCustomApplicationField != undefined
+    //   // taskTemplate.fieldInstances.find(f => {
+    //   //   return f.referenceName == "Custom.Application";
+    //   // }) != undefined
+    // ) {
+    //   if (currentWorkItem["Custom.Application"] != undefined) {
+    //     // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
+    //     workItem.push({
+    //       op: "add",
+    //       path: "/fields/Custom.Application",
+    //       value: currentWorkItem["Custom.Application"]
+    //     });
+    //   } else {
+    //     workItem.push({
+    //       op: "add",
+    //       path: "/fields/Custom.Application",
+    //       value: ctx.project.name
+    //     });
+    //   }
+    // } 
 
     workItem.push({
       op: "add",
@@ -347,34 +357,38 @@ function createWorkItem(
       "System.TeamProject": targetTeam.project
     };
 
-    if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined)
+    //      "System.IterationPath": targetTeamSettings.backlogIteration.name,
+
+    if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined
+      )
     {
-      newWITParams["System.IterationPath"] = targetTeamSettings.backlogIteration.name +
-                                              targetTeamSettings.defaultIteration.path;
+      newWITParams["System.IterationPath"] = targetTeamSettings.defaultIteration.path;
     }
 
-    var myCustomApplicationField = undefined;
-    for (let i=0; i< witType.fieldInstances.length; i++) {
-      if(witType.fieldInstances[i].referenceName == "Custom.Application") {
-        myCustomApplicationField = witType.fieldInstances[i];
-        break;
-      }
-    }
+    console.log("createNewWITParam iteration : ", newWITParams["System.IterationPath"]);
 
-    if (
-      witType != undefined && myCustomApplicationField != undefined
-      // witType.fieldInstances.find(f => {
-      //   return f.referenceName == "Custom.Application";
-      // }) != undefined
-    ) {
-      if (currentWorkItem["Custom.Application"] != undefined) {
-        // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
-        newWITParams["Custom.Application"] =
-          currentWorkItem["Custom.Application"];
-      } else {
-        newWITParams["Custom.Application"] = ctx.project.name;
-      }
-    } 
+    // var myCustomApplicationField = undefined;
+    // for (let i=0; i< witType.fieldInstances.length; i++) {
+    //   if(witType.fieldInstances[i].referenceName == "Custom.Application") {
+    //     myCustomApplicationField = witType.fieldInstances[i];
+    //     break;
+    //   }
+    // }
+
+    // if (
+    //   witType != undefined && myCustomApplicationField != undefined
+    //   // witType.fieldInstances.find(f => {
+    //   //   return f.referenceName == "Custom.Application";
+    //   // }) != undefined
+    // ) {
+    //   if (currentWorkItem["Custom.Application"] != undefined) {
+    //     // ajout du code de code de system. si code systeme fournis sinon on pousse le nom du projet
+    //     newWITParams["Custom.Application"] =
+    //       currentWorkItem["Custom.Application"];
+    //   } else {
+    //     newWITParams["Custom.Application"] = ctx.project.name;
+    //   }
+    // } 
     return newWITParams;
   }
 }
@@ -531,7 +545,17 @@ export function create(context, newWorkItemInfo) {
               let currentContextWorkItemId = context.workItemId !== undefined ? context.workItemId : 
                                               context.id !== undefined ? context.id : context.workItemIds[0];
 
-              witClient
+            
+
+              workClient.getTeamIterations(targetTeam, "Current").then(function(iterations) {
+                console.log("Iterations :", iterations);
+                if(iterations.length > 0)
+                  { targetTeamSettings.defaultIteration = iterations[0]; }
+              }, 
+              function(reason) {
+                console.log("Could not lod iterations: ", reason);
+              }).then(function() {
+                witClient
                 .getWorkItem(currentContextWorkItemId)
                 .then(function(currentWorkItem) {
                   var currentWorkItemFields = currentWorkItem.fields;
@@ -553,6 +577,9 @@ export function create(context, newWorkItemInfo) {
                     );
                   });
                 });
+              }, function(reason) {
+                console.log("Could not finish processing getTEamIterations:", reason);
+              });
             },
             function(reason) {
               ShowErrorMessage(

@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    <script src="../lib/jquery.min.js"></script>
     <script src="../lib/VSS.SDK.min.js"></script>
     <script src="../lib/materialize.min.js"></script>
 
@@ -35,11 +36,26 @@
                 VSS.ready(function () {
                     // Register a listener for the work item group contribution.
                     VSS.register("configuration-form-page", _configurationPage.ConfigurationPageHandler);
-                    M.AutoInit();
                     VSS.notifyLoadSucceeded();
                 });
             }
         );
+
+        var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+        if(!isIE11)
+        {
+            $(document).ready(function() {
+                // M.AutoInit();
+                $('#selProjectTeamIncluded').removeClass("browser-default");
+
+                var elems = document.querySelector('select.linkdialog-project-team-included-select');
+                var instances = M.FormSelect.init(elems);
+            });
+        }
+
+        // $(document).ready(function() {
+        //     M.AutoInit();
+        // });
     </script>
 
     <div class="widget-configuration">
@@ -77,7 +93,7 @@
                                 <div class="dropdown">
                                     <label>Équipes sélectionnées</label>
                                     <div class="input-field">
-                                        <select multiple class="linkdialog-project-team-included-select" ></select>
+                                        <select id="selProjectTeamIncluded" multiple class="linkdialog-project-team-included-select browser-default" style="height: 17em;"></select>
                                     </div>
                                 </div>
                             </div>

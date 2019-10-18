@@ -11,6 +11,12 @@ import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 import { ProjectInfo } from "TFS/Core/Contracts";
 
+interface Window {
+  MSInputMethodContext?: any;
+}
+
+declare var window: Window;
+
 interface IConfigurationInfo {
   projects: IProjectInfo[],
   teams: string[]
@@ -59,6 +65,8 @@ var contributionId =
   extensionCtx.extensionId +
   ".configuration-form-page";
 
+var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+
 // Get the WorkItemFormService.  This service allows you to get/set fields/links on the 'active' work item (the work item
 // that currently is displayed in the UI).
 function getWorkItemFormService() {
@@ -99,6 +107,29 @@ function projectIncludedChanged() {
   }
 }
 
+function teamIncludedChanged()
+{
+  if(isIE11)
+  {
+    teamList = [];
+    $('select.linkdialog-project-team-included-select option:selected').each(function()
+    {
+      teamList.push($(this).val());
+    }); 
+  } 
+  else
+  {
+    let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
+    teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues(); 
+  }
+
+  // Execute registered callbacks
+  for (var i = 0; i < callbacks.length; i++) {
+    callbacks[i](isValid());
+  }
+  
+}
+
 // function projectTeamIncludedSelected() {
 //   let teamSelect = $("select.linkdialog-project-team-included-select");
 //   teamSelect.find("optgroup").each(function(optGroup) {
@@ -124,8 +155,12 @@ function projectIncludedChanged() {
 
 
 function isValid() {
-  let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
-  teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues();
+  // if(!isIE11)
+  // {
+  //   let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
+  //   teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues(); 
+  // }
+
 
   return projectList.length > 0 && teamList.length > 0;
 }
@@ -142,8 +177,22 @@ function getFormData() {
   //   ProjectSelected.push(option);
   // });
 
-  let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
-  teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues();
+  // let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
+  // teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues();
+
+  teamList = [];
+  if(isIE11)
+  {
+    $('select.linkdialog-project-team-included-select option:selected').each(function()
+    {
+      teamList.push($(this).val());
+    }); 
+  } 
+  else
+  {
+    let teamSelect = document.querySelector("select.linkdialog-project-team-included-select");
+    teamList = M.FormSelect.getInstance(teamSelect).getSelectedValues(); 
+  }
 
   let myConfig:IConfigurationInfo = { projects: projectList, teams: teamList};
   console.log("myConfig: ", myConfig);
@@ -221,8 +270,14 @@ function addProjectTeam(team: ITeamInfo) {
 var selectTeamInstance;
 function refreshTeamsSelect() 
 {
-  var elems = document.querySelector('select.linkdialog-project-team-included-select');
-  selectTeamInstance = M.FormSelect.init(elems);
+  if(!isIE11)
+  {
+    var elems = document.querySelector('select.linkdialog-project-team-included-select');
+    selectTeamInstance = M.FormSelect.init(elems); 
+
+    $("li.optgroup-option").on("click", teamIncludedChanged);
+    
+  }
   // var elems = document.querySelectorAll('select');
   // var options = document.querySelectorAll('option');
   // var instances = M.FormSelect.init(elems, options); //M.FormSelect.init(elems, options);
@@ -232,6 +287,11 @@ function refreshTeamsSelect()
   // } else {
   //   selectTeamInstance = M.FormSelect.getInstance(elems);
   // }
+
+  // Execute registered callbacks
+  for (var i = 0; i < callbacks.length; i++) {
+    callbacks[i](isValid());
+  }
 }
 
 function onAddedClick() {
@@ -242,7 +302,6 @@ function onAddedClick() {
           }));
 
         $("select.linkdialog-project-team-included-select").append($("<optgroup>", {
-          disabled: "disabled",
           value: $(this).val(),
           label: $(this).text()
         }));
@@ -373,7 +432,6 @@ function getProjects() {
               })
             );
             $("select.linkdialog-project-team-included-select").append($("<optgroup>", {
-              disabled: "disabled",
               value: project.id,
               label: project.name
             }));
@@ -435,6 +493,14 @@ export function ConfigurationPageHandler(context) {
         "change",
         projectIncludedChanged
       );
+
+      if(isIE11)
+      {
+        $("select.linkdialog-project-team-included-select").on(
+          "change",
+          teamIncludedChanged
+        ); 
+      }
 
       // $("select.linkdialog-project-team-included-select").on(
       //   "change",

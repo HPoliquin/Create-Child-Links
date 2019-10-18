@@ -10,6 +10,12 @@ import * as _coreRestClient from "TFS/Core/RestClient";
 import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 
+interface Window {
+  MSInputMethodContext?: any;
+}
+
+declare var window: Window;
+
 interface IConfigurationInfo {
   projects: IProjectInfo[],
   teams: string[]
@@ -62,6 +68,8 @@ var callbacks = [];
 var projectList:IProjectInfo[] = [];
 var teamList = [];
 
+var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+
 function inputChanged() {
   // Execute registered callbacks
   for (var i = 0; i < callbacks.length; i++) {
@@ -70,9 +78,17 @@ function inputChanged() {
 }
 
 function projectChanged() {
-  let teamSelect = document.querySelector("select.linkdialog-project-select");
-  let selectTeamInstance = M.FormSelect.init(teamSelect);
-  teamList = selectTeamInstance.getSelectedValues();
+  teamList = [];
+  if(isIE11) {
+    $('select.linkdialog-project-select option:selected').each(function()
+    {
+      teamList.push($(this).val());
+    }); 
+  } else {
+    let teamSelect = document.querySelector("select.linkdialog-project-select");
+    let selectTeamInstance = M.FormSelect.init(teamSelect);
+    teamList = selectTeamInstance.getSelectedValues();
+  }
 
   if(teamList.length >0 && teamList[0] !== "Choisir une équipe")
   {
@@ -88,7 +104,10 @@ function projectChanged() {
             .remove()
             .end()
             .val("");
-    refreshWITTypesSelect();
+    if(!isIE11) {
+      refreshWITTypesSelect();
+    }
+    
   }
   
 
@@ -99,9 +118,13 @@ function projectChanged() {
 }
 
 function isValid() {
-  refreshTeamsSelect();
-  refreshWITCategory();
-  refreshWITTypesSelect();
+  if(!isIE11)
+  {
+    refreshTeamsSelect();
+    refreshWITCategory();
+    refreshWITTypesSelect();
+  }
+  
   // Check whether form is valid or not
   let projectIndex = $("select.linkdialog-project-select").prop(
     "selectedIndex"
@@ -123,37 +146,67 @@ function isValid() {
   );
 }
 
+function refreshSelects()
+{
+  refreshTeamsSelect();
+  refreshWITTypesSelect();
+  refreshWITCategory();
+
+  $("li.optgroup-option").on("click", refreshSelects);
+}
+
 function refreshTeamsSelect() 
 {
-  var elems = document.querySelector('select.linkdialog-project-select');
-  let selectTeamInstance = M.FormSelect.init(elems);
+  if(!isIE11)
+  {
+    var elems = document.querySelector('select.linkdialog-project-select');
+    let selectTeamInstance = M.FormSelect.init(elems); 
+  }
 }
 
 function refreshWITTypesSelect()
 {
-  var elems = document.querySelector('select.linkdialog-wittype-select');
-  let selectWITInstance = M.FormSelect.init(elems);
+  if(!isIE11)
+  {
+    var elems = document.querySelector('select.linkdialog-wittype-select');
+    let selectWITInstance = M.FormSelect.init(elems); 
+  }
 }
 
 function refreshWITCategory()
 {
-  var elems = document.querySelector('select.linkdialog-linktype-select');
-  let selectWITCategoryInstance = M.FormSelect.init(elems);
+  if(!isIE11)
+  {
+    var elems = document.querySelector('select.linkdialog-linktype-select');
+    let selectWITCategoryInstance = M.FormSelect.init(elems); 
+  }
 }
 
 function getFormData() {
   // Get form values
+  // return {
+  //   linkType: $("select.linkdialog-linktype-select").val(),
+  //   witType: $("select.linkdialog-wittype-select option:selected").text(),
+  //   "System.Title": $("input#dialog-label").val(),
+  //   "System.Comment": $("textarea#comment").val(),
+  //   "System.Description": $("textarea#description").val(),
+  //   Project: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("label"),
+  //   ProjectId: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("value"),
+  //   Team: $("select.linkdialog-project-select option:selected").text(),
+  //   TeamId: $("select.linkdialog-project-select option:selected").val()
+  // };
+
   return {
-    linkType: $("select.linkdialog-linktype-select").val(),
-    witType: $("select.linkdialog-wittype-select option:selected").html(),
-    "System.Title": $("input#dialog-label").val(),
-    "System.Comment": $("textarea#comment").val(),
-    "System.Description": $("textarea#description").val(),
-    Project: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("label"),
-    ProjectId: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("value"),
-    Team: $("select.linkdialog-project-select option:selected").text(),
-    TeamId: $("select.linkdialog-project-select option:selected").val()
-  };
+      linkType: $("select.linkdialog-linktype-select").val(),
+      witType: $("select.linkdialog-wittype-select option:selected").text(),
+      "System.Title": $("input#dialog-label").val(),
+      "System.Comment": $("textarea#comment").val(),
+      "System.Description": $("textarea#description").val(),
+      Project: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("label"),
+      ProjectId: $("select.linkdialog-project-select option:selected").parent("optgroup").attr("value"),
+      Team: $("select.linkdialog-project-select option:selected").text(),
+      TeamId: $("select.linkdialog-project-select option:selected").val()
+    };
 
 }
 
@@ -205,7 +258,6 @@ function getProjects() {
         projects.forEach(function(project) {
           if (isProjectIncluded(project.id)) {
             $("select.linkdialog-project-select").append($("<optgroup>", {
-              disabled: "disabled",
               value: project.id,
               label: project.name
             }));

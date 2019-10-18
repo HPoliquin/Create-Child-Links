@@ -12,6 +12,7 @@
 </head>
 
 <body>
+  <script src="../lib/jquery.min.js"></script>
   <script src="../lib/VSS.SDK.min.js"></script>
   <script src="../lib/materialize.min.js"></script>
 
@@ -35,10 +36,21 @@
 
         // // Register a listener for the work item group contribution.
         VSS.register("create-child-links-work-item-form-page", workItemPage.workItemFormPageHandler);
-        M.AutoInit();
+        
         VSS.notifyLoadSucceeded();
       }
     );
+
+    var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+    if(!isIE11)
+    {
+        $(document).ready(function() {
+            // M.AutoInit();
+            $('select').removeClass("browser-default");
+
+            M.AutoInit();
+        });
+    }
   </script>
 
   <div class="widget-configuration">
@@ -59,7 +71,7 @@
                 <div class="dropdown">
                   <label>Équipe</label>
                   <div class="input-field">
-                    <select class="linkdialog-project-select"></select>
+                    <select class="linkdialog-project-select browser-default"></select>
                   </div>
                 </div>
               </div>
@@ -70,7 +82,7 @@
                 <div class="dropdown">
                   <label>Type de lien</label>
                   <div class="input-field">
-                    <select class="linkdialog-linktype-select"></select>
+                    <select class="linkdialog-linktype-select browser-default"></select>
                   </div>
                 </div>
               </div>
@@ -78,7 +90,7 @@
                 <div class="dropdown">
                   <label>Type d'élément de travail</label>
                   <div class="input-field">
-                    <select class="linkdialog-wittype-select"></select>
+                    <select class="linkdialog-wittype-select browser-default"></select>
                   </div>
                 </div>
               </div>
