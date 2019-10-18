@@ -79,22 +79,16 @@ module.exports = function(grunt) {
       },
     },
 
-    clean: ['dist/*.vsix'],
-
-    uglify: {
-      my_target: {
-        files: {
-          'dest/output.min.js': ['src/input1.js', 'src/input2.js'],
-        },
-      },
+    clean: {
+      build: ['dist/*.vsix'],
     },
+
   });
 
   grunt.loadNpmTasks('grunt-exec');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-ts');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('mjq-dev', [
     'copy',
