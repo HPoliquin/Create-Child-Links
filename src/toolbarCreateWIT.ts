@@ -256,7 +256,7 @@ function createWorkItem(
     // check if AssignedTo field value is @me
     // if (taskTemplate.fields['System.AssignedTo'] != null) {
     //     if (taskTemplate.fields['System.AssignedTo'].toLowerCase() == '@me') {
-    // workItem.push({ "op": "add", "path": "/fields/System.AssignedTo", "value": ctx.user.uniqueName })
+    //        workItem.push({ "op": "add", "path": "/fields/System.AssignedTo", "value": ctx.user.uniqueName })
     //     }
     // }
 
@@ -290,13 +290,6 @@ function createWorkItem(
               newWorkItemInfo["System.Comment"]
             );
 
-            // //Save
-            // service.save().then(function(response) {
-            //   WriteLog(" Saved");
-            // },
-            // function(error) {
-            //   WriteLog(" Error saving: " + response);
-            // });
           } else {
             //save using RestClient
             var workItemId = currentWorkItemFields["System.Id"];
@@ -359,9 +352,9 @@ function createWorkItem(
 
     //      "System.IterationPath": targetTeamSettings.backlogIteration.name,
 
-    if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined
-      )
-    {
+    if (targetTeamSettings.defaultIteration != undefined && targetTeamSettings.defaultIteration.path != undefined)
+    { 
+      // On crée dans l'itération par defaut, on ne crée pas au niveau du backlog
       newWITParams["System.IterationPath"] = targetTeamSettings.defaultIteration.path;
     }
 
@@ -466,12 +459,7 @@ function AddRelationToCurrentWorkItemJSon(
       op: "add",
       path: "/fields/System.History",
       value: newWorkItemInfo["System.Comment"]
-    }//,
-    // {
-    //   op: "add",
-    //   path: "/fields/System.Description",
-    //   value: newWorkItemInfo["System.Description"]
-    // }
+    }
   ];
 
   witClient
