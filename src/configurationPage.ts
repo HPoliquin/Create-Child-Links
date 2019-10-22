@@ -10,6 +10,8 @@ import * as _coreRestClient from "TFS/Core/RestClient";
 import * as _Controls from "VSS/Controls";
 import * as _StatusIndicator from "VSS/Controls/StatusIndicator";
 import { ProjectInfo } from "TFS/Core/Contracts";
+// import * as M from "materialize-css/dist/js/materialize" ;
+// import M = require('../lib/materialize.min');
 
 interface Window {
   MSInputMethodContext?: any;

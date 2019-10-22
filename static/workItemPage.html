@@ -26,7 +26,7 @@
     // Load main entry point for extension
     VSS.require(
       [
-        "scripts/workItemPage",
+        "../scripts/workItemPage",
         "TFS/Dashboards/WidgetHelpers",
         "TFS/WorkItemTracking/Services",
       ],
@@ -38,19 +38,19 @@
         VSS.register("create-child-links-work-item-form-page", workItemPage.workItemFormPageHandler);
         
         VSS.notifyLoadSucceeded();
+
+        var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+        if(!isIE11)
+        {
+            $(document).ready(function() {
+                // M.AutoInit();
+                $('select').removeClass("browser-default");
+                M.AutoInit();
+            });
+        }
       }
     );
 
-    var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
-    if(!isIE11)
-    {
-        $(document).ready(function() {
-            // M.AutoInit();
-            $('select').removeClass("browser-default");
-
-            M.AutoInit();
-        });
-    }
   </script>
 
   <div class="widget-configuration">

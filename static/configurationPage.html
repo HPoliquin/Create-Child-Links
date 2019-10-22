@@ -12,8 +12,8 @@
 </head>
 
 <body>
-    <script src="../lib/jquery.min.js"></script>
     <script src="../lib/VSS.SDK.min.js"></script>
+    <script src="../lib/jquery.min.js"></script>
     <script src="../lib/materialize.min.js"></script>
 
     <script type="text/javascript">
@@ -27,7 +27,7 @@
         VSS.require(
             [
                 "scripts/configurationPage",
-                "TFS/Dashboards/WidgetHelpers"
+                "TFS/Dashboards/WidgetHelpers",
             ],
             function (_configurationPage, _WidgetHelpers) {
                 _WidgetHelpers.IncludeWidgetStyles();
@@ -37,25 +37,22 @@
                     // Register a listener for the work item group contribution.
                     VSS.register("configuration-form-page", _configurationPage.ConfigurationPageHandler);
                     VSS.notifyLoadSucceeded();
+
+                    var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
+                    if(!isIE11)
+                    {
+                        $(document).ready(function() {
+                            // M.AutoInit();
+                            $('#selProjectTeamIncluded').removeClass("browser-default");
+
+                            var elems = document.querySelector('select.linkdialog-project-team-included-select');
+                            var instances = M.FormSelect.init(elems);
+                        });
+                    }
+
                 });
             }
         );
-
-        var isIE11 = !!window.MSInputMethodContext && !!document.DOCUMENT_NODE;
-        if(!isIE11)
-        {
-            $(document).ready(function() {
-                // M.AutoInit();
-                $('#selProjectTeamIncluded').removeClass("browser-default");
-
-                var elems = document.querySelector('select.linkdialog-project-team-included-select');
-                var instances = M.FormSelect.init(elems);
-            });
-        }
-
-        // $(document).ready(function() {
-        //     M.AutoInit();
-        // });
     </script>
 
     <div class="widget-configuration">
