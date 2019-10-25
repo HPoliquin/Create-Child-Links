@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: 'Ubuntu-16.04'
 
+variables: {
+  Extension.Version: string
+}
+
 steps:
 - task: NodeTool@0
   inputs:
@@ -40,9 +44,9 @@ steps:
   inputs:
     connectedServiceName: 'cofomo-henrickpoliquin'
     fileType: vsix
-    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-*.vsix'
+    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.Version).vsix'
     extensionName: 'Create Child links'
-    updateTasksVersion: true
+    updateTasksVersion: false
     extensionVisibility: private
     extensionPricing: free
 
