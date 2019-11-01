@@ -46,7 +46,6 @@ steps:
     publisherId: 'Cofomo-HenrickPoliquin'
     extensionId: 'vsts-work-item-create-child-links-dev'
     versionAction: 'Patch'
-    extensionVersionOverride: 'Extension.VersionOverride'
 - task: PackageAzureDevOpsExtension@2
   inputs:
     rootFolder: 
