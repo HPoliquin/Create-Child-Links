@@ -72,13 +72,6 @@ steps:
     extensionVisibility: 'private'
     extensionPricing: 'free'
 
-- task: IsAzureDevOpsExtensionValidServer@2
-  inputs:
-    connectTo: 'VsTeam'
-    connectedServiceName: 'cofomo-henrickpoliquin'
-    method: 'id'
-    publisherId: 'Cofomo-HenrickPoliquin'
-    extensionId: 'vsts-work-item-create-child-links-dev'
 
 # - task: PublishExtension@1
 #   displayName: 'Publish Extension'
