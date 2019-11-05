@@ -39,16 +39,53 @@ steps:
 #     gruntFile: 'gruntfile.js'
 #     targets: publish-dev
 
-- task: PublishExtension@1
-  displayName: 'Publish Extension'
+- task: TfxInstaller@2
   inputs:
+    version: 'v0.6.x'
+
+- task: QueryAzureDevOpsExtensionVersion@2
+  inputs:
+    connectTo: 'VsTeam'
     connectedServiceName: 'cofomo-henrickpoliquin'
-    fileType: vsix
-    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.Version).vsix'
-    extensionName: 'Create Child links'
+    publisherId: 'Cofomo-HenrickPoliquin'
+    extensionId: 'vsts-work-item-create-child-links-dev'
+    versionAction: 'Patch'
+- task: PackageAzureDevOpsExtension@2
+  inputs:
+    rootFolder: 
+    outputPath: '$(System.DefaultWorkingDirectory)/dist/'
+    publisherId: 'Cofomo-HenrickPoliquin'
+    extensionId: 'vsts-work-item-create-child-links-dev'
+    extensionName: 'Creation de demandes de soutien'
+    extensionVersion: '$(Extension.Version)'
     updateTasksVersion: false
-    extensionVisibility: private
-    extensionPricing: free
+    extensionVisibility: 'private'
+    extensionPricing: 'free'
+
+- task: PublishAzureDevOpsExtension@2
+  inputs:
+    connectTo: 'VsTeam'
+    connectedServiceName: 'cofomo-henrickpoliquin'
+    fileType: 'vsix'
+    vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.VersionOverride).vsix'
+    publisherId: 'Cofomo-HenrickPoliquin'
+    extensionId: 'vsts-work-item-create-child-links-dev'
+    extensionName: 'Creation de demandes de soutien'
+    extensionVersion: '$(Extension.VersionOverride)'
+    extensionVisibility: 'private'
+    extensionPricing: 'free'
+
+
+# - task: PublishExtension@1
+#   displayName: 'Publish Extension'
+#   inputs:
+#     connectedServiceName: 'cofomo-henrickpoliquin'
+#     fileType: vsix
+#     vsixFile: '$(System.DefaultWorkingDirectory)/dist/cofomo-henrickpoliquin.vsts-work-item-create-child-links-dev-$(Extension.Version).vsix'
+#     extensionName: 'Create Child links'
+#     updateTasksVersion: true
+#     extensionVisibility: private
+#     extensionPricing: free
 
 # - task: ms-devlabs.vsts-developer-tools-build-tasks.publish-extension-build-task.PublishExtension@1
 #   displayName: 'Publish Extension'
