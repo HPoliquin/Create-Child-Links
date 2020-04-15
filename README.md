@@ -17,6 +17,17 @@ We need your feedback! Here are some ways to connect with us:
 
 # To Use
 
+Install vss-web-extension-dsk
+
+```
+> npm install -g vss-web-extension-sdk --save
+```
+
+Install txf-cli
+```
+­> npm install -g tfx-cli
+```
+
 Install TypeScript & Grunt:
 
 ```
