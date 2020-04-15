@@ -13,7 +13,7 @@ import {
   WorkItemTypeCategory,
   WorkItem
 } from "TFS/WorkItemTracking/Contracts";
-import { FieldType, TeamSetting, TeamFieldValues, BacklogConfiguration } from "TFS/Work/Contracts";
+import { FieldType, TeamSetting, TeamSettingsIteration, TeamFieldValues, BacklogConfiguration } from "TFS/Work/Contracts";
 import { buttonKeydownHandler } from "VSS/Utils/UI";
 import {
   TeamProject,
@@ -356,6 +356,10 @@ function createWorkItem(
     { 
       // On crée dans l'itération par defaut, on ne crée pas au niveau du backlog
       newWITParams["System.IterationPath"] = targetTeamSettings.defaultIteration.path;
+    } 
+    else // Pas d'itération, alors on crée au niveau de l'itéation du backlog
+    {
+      newWITParams["System.IterationPath"] = targetTeam.project + targetTeamSettings.backlogIteration.path;
     }
 
     console.log("createNewWITParam iteration : ", newWITParams["System.IterationPath"]);
@@ -542,6 +546,9 @@ export function create(context, newWorkItemInfo) {
               }, 
               function(reason) {
                 console.log("Could not lod iterations: ", reason);
+                console.log("targetTeam: ", targetTeam)
+                console.log("teamAreaPath: ", teamAreaPath);
+                console.log("targetTeamSettings: ", targetTeamSettings);
               }).then(function() {
                 witClient
                 .getWorkItem(currentContextWorkItemId)
