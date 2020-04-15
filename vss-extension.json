@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "vsts-work-item-create-child-links",
     "publisher": "cofomo-henrickpoliquin",
-    "version": "0.2.231",
+    "version": "0.2.236",
     "name": "Creation de demandes de soutien",
     "description": "Creation de demandes de soutien, par template, dans une équipe ciblée",
     "public": false,
