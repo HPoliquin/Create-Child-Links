@@ -31,7 +31,7 @@ Install txf-cli
 Install TypeScript & Grunt:
 
 ```
-> npm install -g typescript Grunt
+> npm install -g typescript grunt-cli
 ```
 
 Install node modules:
