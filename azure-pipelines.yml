@@ -43,14 +43,16 @@ steps:
   inputs:
     version: 'v0.6.x'
 
-- task: QueryAzureDevOpsExtensionVersion@2
+- task: QueryAzureDevOpsExtensionVersion@3
   inputs:
     connectTo: 'VsTeam'
     connectedServiceName: 'cofomo-henrickpoliquin'
     publisherId: 'Cofomo-HenrickPoliquin'
     extensionId: 'vsts-work-item-create-child-links-dev'
     versionAction: 'Patch'
-- task: PackageAzureDevOpsExtension@2
+
+
+- task: PackageAzureDevOpsExtension@3
   inputs:
     rootFolder: 
     outputPath: '$(System.DefaultWorkingDirectory)/dist/'
@@ -62,7 +64,7 @@ steps:
     extensionVisibility: 'private'
     extensionPricing: 'free'
 
-- task: PublishAzureDevOpsExtension@2
+- task: PublishAzureDevOpsExtension@3
   inputs:
     connectTo: 'VsTeam'
     connectedServiceName: 'cofomo-henrickpoliquin'
@@ -74,7 +76,6 @@ steps:
     extensionVersion: '$(Extension.VersionOverride)'
     extensionVisibility: 'private'
     extensionPricing: 'free'
-
 
 # - task: PublishExtension@1
 #   displayName: 'Publish Extension'
