@@ -20,7 +20,7 @@
     "bluebird": "^3.5.5",
     "jquery": "^3.5.0",
     "materialize-css": "^1.0.0-rc.2",
-    "requirejs": "^2.3.6",
+    "requirejs": "^2.3.7",
     "vss-web-extension-sdk": "^5.141.0"
   },
   "devDependencies": {
